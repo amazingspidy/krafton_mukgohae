@@ -43,76 +43,79 @@
     </style>
     <script>
         function signup() {
+            var email = $('#input-email').val();
+            var nickname = $('#input-nickname').val();
+            var password = $('#input-password').val();
+            
+            if (!emailCheck(email)) {
+                alert('유효하지 않은 이메일 주소입니다.');
+                return;
+            }
+            
+            if (!nickname) {
+                alert('닉네임을 입력하세요.');
+                return;
+            }
+            
+            if (!password) {
+                alert('비밀번호를 입력하세요.');
+                return;
+            }
+            
             $.ajax({
                 type: "POST",
                 url: "/api/signup",
                 data: {
-                    email_give: $('#input-email').val(),
-                    pw_give: $('#input-password').val(),
-                    nickname_give: $('#input-nickname').val()
+                    email_give: email,
+                    pw_give: password,
+                    nickname_give: nickname
                 },
                 success: function (response) {
                     if (response['result'] == 'success') {
-                        alert('회원가입이 완료되었습니다.')
-                        window.location.href = '/login'
+                        alert('회원가입이 완료되었습니다.');
+                        window.location.href = '/login';
                     } else {
-                        alert(response['msg'])
+                        alert(response['msg']);
                     }
                 }
-            })
+            });
         }
-        function emailCheck(email_address){     
+    
+        function emailCheck(email_address) {
             email_regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
-            if(!email_regex.test(email_address)){ 
-                return false; 
-            }else{
-                return true;
-            }
-        }
-
-        function validateEmail() {
-            var emailInput = document.getElementById('input-email');
-            var resultDiv = document.getElementById('result');
-        
-            var email = emailInput.value;
-        
-            if (emailCheck(email)) {
-                resultDiv.innerHTML = '유효한 이메일 주소입니다.';
-                $('#signup-button').append('<button type="submit" onclick="signup()" class="btn btn-primary">회원가입</button>')
-            } else {
-                resultDiv.innerHTML = '유효하지 않은 이메일 주소입니다.';
-            }
+            return email_regex.test(email_address);
         }
     </script>
 </head>
 
 <body>
-<div class="wrap">
-    <div class="title">
-        <h1 class="display-4">회원가입</h1>
-        <hr class="my-4">
-        <div class="posting-box" id="post-box">
-            <div class="form-group">
-                <label>EMAIL</label>
-                <input type="email" class="form-control" aria-describedby="emailHelp"
-                       id="input-email" placeholder="이메일을 입력해주세요">
-                       <button onclick="validateEmail()">확인</button>
-                       <div id="result"></div>
+    <div class="wrap">
+        <div class="title">
+            <h1 class="display-4">회원가입</h1>
+            <hr class="my-4">
+            <div class="posting-box" id="post-box">
+                <div class="form-group">
+                    <label>EMAIL</label>
+                    <input type="email" class="form-control" aria-describedby="emailHelp" id="input-email" placeholder="이메일을 입력해주세요">
+                    <div id="result"></div>
+                </div>
+                <div class="form-group">
+                    <label>닉네임</label>
+                    <input type="text" class="form-control" 
+                    id="input-nickname" placeholder="" oninvalid="this.setCustomValidity('닉네임를 입력하세요.')" required>
+                </div>
+                <div class="form-group">
+                    <label>비밀번호</label>
+                    <input type="password" class="form-control" aria-describedby="emailHelp" 
+                    id="input-password" autocomplete="current-password" placeholder="" 
+                    oninvalid="this.setCustomValidity('비밀번호를 입력하세요.')" required>
+                </div>
+                <div id="signup-button">
+                    <button type="submit" class="btn btn-primary" onclick="signup()">회원가입</button>
+                </div>
             </div>
-            <div class="form-group">
-                <label>닉네임</label>
-                <input type="email" class="form-control" aria-describedby="emailHelp"
-                       id="input-nickname" placeholder="">
-            </div>
-            <div class="form-group">
-                <label>비밀번호</label>
-                <input type="password" class="form-control" aria-describedby="emailHelp"
-                       id="input-password" autocomplete="current-password" placeholder="">
-            </div>
-            <div id = "signup-button"> </div>
         </div>
     </div>
-</div>
 </body>
 
 </html>
