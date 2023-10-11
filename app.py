@@ -1,9 +1,15 @@
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for
+
+# JWT 패키지를 사용합니다. (설치해야할 패키지 이름: PyJWT)
 import jwt
+
+# 토큰에 만료시간을 줘야하기 때문에, datetime 모듈도 사용합니다.
 import datetime
 import hashlib
 from pymongo import MongoClient
 
+
+# JWT 토큰을 만들 때 필요한 비밀문자열
 SECRET_KEY = 'MUKGOHAE'
 
 app = Flask(__name__)
@@ -54,7 +60,10 @@ db = client.dbmukgohae
 
 @app.route('/')
 def home():
-    return render_template('main.html')
+    orders = [{'withwho':'함께',
+              'restaurant':'홍콩반점',
+              'menu':'꿔바로우'}]
+    return render_template('main.html', orders=orders)
 
 @app.route('/login')
 def login():

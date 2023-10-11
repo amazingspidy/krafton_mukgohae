@@ -61,6 +61,27 @@
                 }
             })
         }
+        function emailCheck(email_address){     
+            email_regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
+            if(!email_regex.test(email_address)){ 
+                return false; 
+            }else{
+                return true;
+            }
+        }
+
+        function validateEmail() {
+            var emailInput = document.getElementById('input-email');
+            var resultDiv = document.getElementById('result');
+        
+            var email = emailInput.value;
+        
+            if (emailCheck(email)) {
+                resultDiv.innerHTML = '유효한 이메일 주소입니다.';
+            } else {
+                resultDiv.innerHTML = '유효하지 않은 이메일 주소입니다.';
+            }
+        }
     </script>
 </head>
 
@@ -71,9 +92,11 @@
         <hr class="my-4">
         <div class="posting-box" id="post-box">
             <div class="form-group">
-                <label>ID</label>
+                <label>EMAIL</label>
                 <input type="email" class="form-control" aria-describedby="emailHelp"
-                       id="input-email" placeholder="">
+                       id="input-email" placeholder="이메일을 입력해주세요">
+                       <button onclick="validateEmail()">확인</button>
+                       <div id="result"></div>
             </div>
             <div class="form-group">
                 <label>닉네임</label>
@@ -82,8 +105,8 @@
             </div>
             <div class="form-group">
                 <label>비밀번호</label>
-                <input type="email" class="form-control" aria-describedby="emailHelp"
-                       id="input-password" placeholder="">
+                <input type="password" class="form-control" aria-describedby="emailHelp"
+                       id="input-password" autocomplete="current-password" placeholder="">
             </div>
             <button type="submit" onclick="signup()" class="btn btn-primary">회원가입</button>
         </div>
