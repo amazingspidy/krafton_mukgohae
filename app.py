@@ -62,7 +62,7 @@ app.json = CustomJSONProvider(app)
 #         틀 안에 데이터를 채워 넣어야 하는데 이는 아래 이어지는 /api/list 를 통해 이루어집니다.
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('main.html')
 
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
