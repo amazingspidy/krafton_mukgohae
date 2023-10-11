@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
         crossorigin="anonymous"></script>
-    <title>먹고해 | 메인페이지</title>
+    <title>먹고해 | 글쓰기페이지</title>
     <style>
         .rightbutton {
             width: 390px;
@@ -37,17 +37,7 @@
 
 <body>
     <div class = "rightbutton">
-        <button>로그아웃</button> <button>글쓰기</button>
-        <div style = "width:180px; border: 1px dotted;"> <div class = "lefttextbox"> 먹고싶은걸 고르셨다면?</div></div>
-        <hr width = "100%" color = "black">
-        
-            <div class = "centerbutton">
-                <button> 치킨 </button><button> 햄버거 </button><button> 족발/보쌈 </button><button> 중식 </button> <br>
-                <button> 피자 </button><button> 분식 </button><button> 일식 </button><button> 디저트 </button><button> 기타 </button>
-            </div>
-            <hr width = "100%" color = "black">
-        <div style = "width:180px; border: 1px dotted;"> <div class = "lefttextbox"> 뭐 먹을지 모르겠을때!</div></div>
-
+        <button>로그아웃</button> 
         <div class="card">
             <div class="card-header">
               혼자/함께 먹어요
@@ -56,9 +46,25 @@
               <h5 class="card-title">날짜 & 시간</h5>
               <p class="card-text">식당/메뉴/주문자명</p>
               <p class="card-text">최대 n명중 m명 참여! (m/n)</p>
-              <a href="#" class="btn btn-primary">참여하기!</a>
             </div>
           </div>
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroup-sizing-default">장소</span>
+            </div>
+            <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+          </div>
+          
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroup-sizing-default">계좌정보</span>
+            </div>
+            <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+          </div>
+          <button>수정하기</button> 
+        
+
+          
           
     </div>
     
