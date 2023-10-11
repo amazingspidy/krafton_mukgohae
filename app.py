@@ -1,14 +1,25 @@
 from bson import ObjectId
 from pymongo import MongoClient
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, request,  redirect, url_for
 from flask.json.provider import JSONProvider
+from flask_restful import Resource, Api
+from flask_pymongo import PyMongo
+from flask_jwt_extended import (JWTManager, jwt_required, create_access_token, get_jwt_identity
+)
+from werkzeug.security import generate_password_hash, check_password_hash
 
 import json
 import sys
 
 
 app = Flask(__name__)
+
+app.config['MONGO_URI'] = 'mongodb://localhost:27017/your_database_name'
+app.config['JWT_SECRET_KEY'] = 'your-secret-key'
+mongo = PyMongo(app)
+api = Api(app)
+jwt = JWTManager(app)
 
 client = MongoClient('localhost', 27017)
 db = client.dbjungle
@@ -53,101 +64,39 @@ app.json = CustomJSONProvider(app)
 def home():
     return render_template('index.html')
 
-
-# API #2: 휴지통에 버려지지 않은 영화 목록을 반환합니다.
-@app.route('/api/list', methods=['GET'])
-def show_movies():
-    # client 에서 요청한 정렬 방식이 있는지를 확인합니다. 없다면 기본으로 좋아요 순으로 정렬합니다.
-    sortMode = request.args.get('sortMode', 'likes')
-
-    # 1. db에서 trashed 가 False인 movies 목록을 검색합니다. 주어진 정렬 방식으로 정렬합니다.
-    
-    if sortMode == 'likes':
-        movies = list(db.movies.find(
-            {'trashed': False}, {}).sort(sortMode, -1))
-
-    elif sortMode == 'viewers':
-        movies = list(db.movies.find(
-            {'trashed': False}, {}).sort(sortMode, -1))
-    elif sortMode == 'date':
-        movies = list(db.movies.find({'trashed': False}, {}).sort(
-            [('open_year', -1), ('open_month', -1), ('open_day', -1)]))
-        # 여기서 개봉일 빠른순으로 하고싶으면 1로하면 된다. -1이면 큰거순(내림차순) 1이면 오름차순.
-    else:
-        return jsonify({'result': 'failure'})
-
-    # 2. 성공하면 success 메시지와 함께 movies_list 목록을 클라이언트에 전달합니다.
-    return jsonify({'result': 'success', 'movies_list': movies})
+@app.route('/signup', methods=['POST', 'GET'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        password_hash = generate_password_hash(password)
+        if mongo.db.users.find_one({'username': username}):
+            return '이미 존재하는 사용자입니다.'
+        mongo.db.users.insert_one({'username': username, 'password': password_hash})
+        return redirect(url_for('login'))
+    return render_template('signup.html')
 
 
-@app.route('/api/list/trash', methods=['GET'])
-def show_movies2():
-    # client 에서 요청한 정렬 방식이 있는지를 확인합니다. 없다면 기본으로 좋아요 순으로 정렬합니다.
-    sortMode = request.args.get('sortMode', 'likes')
-    # 이곳에서는 쓰레기통에 있는 영화들을 보여줘야하기때문에, 'trashed': True로 설정합니다.
-    if sortMode == 'likes':
-        movies = list(db.movies.find(
-            {'trashed': True}, {}).sort(sortMode, -1))
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = mongo.db.users.find_one({'username': username})
+        if user and check_password_hash(user['password'], password):
+            access_token = create_access_token(identity=username)
+            return f'로그인 성공! 토큰: {access_token}'
+        return '올바르지 않은 사용자 이름 또는 비밀번호입니다.'
+    return render_template('login.html')
 
-    elif sortMode == 'viewers':
-        movies = list(db.movies.find(
-            {'trashed': True}, {}).sort(sortMode, -1))
-    elif sortMode == 'date':
-        movies = list(db.movies.find({'trashed': True}, {}).sort(
-            [('open_year', -1), ('open_month', -1), ('open_day', -1)]))
-        # 여기서 개봉일 빠른순으로 하고싶으면 1로하면 된다. -1이면 큰거순(내림차순) 1이면 오름차순.
-    else:
-        return jsonify({'result': 'success', 'movies_list': movies})
-
-    # 2. 성공하면 success 메시지와 함께 movies_list 목록을 클라이언트에 전달합니다.
-    return jsonify({'result': 'success', 'movies_list': movies})
-
-
-# API #3: 영화에 좋아요 숫자를 하나 올립니다.
-@app.route('/api/like', methods=['POST'])
-def like_movie():
-    # 1. movies 목록에서 find_one으로 영화 하나를 찾습니다.
-    movie_receive = request.form['title_give']
-    #movie = db.movies.find_one({})
-    movie = db.movies.find_one({'title': movie_receive})
-
-    # 2. movie의 like 에 1을 더해준 new_like 변수를 만듭니다.
-    new_likes = movie['likes'] + 1
-
-    # 3. movies 목록에서 id 가 매칭되는 영화의 like 를 new_like로 변경합니다.
-    # 참고: '$set' 활용하기!
-    result = db.movies.update_one({'title': movie_receive}, {
-                                  '$set': {'likes': new_likes}})
-
-    # 4. 하나의 영화만 영향을 받아야 하므로 result.updated_count 가 1이면  result = success 를 보냄
-    if result.modified_count == 1:
-        return jsonify({'result': 'success'})
-    else:
-        return jsonify({'result': 'failure'})
-
-
-
-@app.route('/api/delete', methods=['POST'])
-def trash_movie(): #휴지통 옮기기
-    movie_receive = request.form['title_give']
-    db.movies.update_one({'title': movie_receive}, {'$set': {'trashed': True}})
-    return jsonify({'msg': '휴지통 보내기 완료!'})
-
-
-@app.route('/api/restore', methods=['POST'])
-def restore_movie(): #복구하기
-    movie_receive = request.form['title_give']
-    db.movies.update_one({'title': movie_receive}, {'$set': {'trashed': False}})
-    return jsonify({'msg': '휴지통에서 복구 완료!'})
-
-
-@app.route('/api/absdel', methods=['POST'])
-def absdel_movie():  # 완전삭제
-    movie_receive = request.form['title_give']
-    db.movies.delete_one({'title': movie_receive})
-    return jsonify({'msg': '삭제 완료! 안녕!'})
+@app.route('/dashboard')
+@jwt_required
+def dashboard():
+    current_user = get_jwt_identity()
+    return f'로그인 성공! 대시보드에 오신 것을 환영합니다, {current_user}!'
 
 
 if __name__ == '__main__':
     print(sys.executable)
+    app.secret_key = 'your-secret-key'
     app.run('0.0.0.0', port=5000, debug=True)
