@@ -33,6 +33,57 @@
             text-align: left;
         }
     </style>
+    <script>
+
+        let orderMode;  //이미 주문을 완료하거나 글쓰기를 한사람한테는 True
+        
+        function go_signup() {
+            window.location.href = '/signup'
+        }
+        function go_login() {
+            window.location.href = '/login'
+        }
+        // 로그인에 성공해서 토큰이 있는 경우에만 인사하기!
+        function hello() {
+            $.ajax({
+                type: "GET",
+                url: "/api/isAuth",
+                data: {},
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        // 로그인한 사용자면 닉네임을 보여주는 알람을 띄움!
+                        let nickname = response['nickname']
+                        alert(`반갑습니다 ${nickname}님!!`)
+                    } else {
+                        alert(response['msg'])
+                        window.location.href = '/login'
+                    }
+                }
+            })
+        }
+
+        $(document).ready(function () {
+            // 맨 처음 접속시에는 orderMode 가 False입니다.
+            orderMode = false;
+            showMain()
+
+        });
+
+
+        function changeParti() {
+            if (orderMode == false) {
+                alert('참여완료!')
+                $('#parti-button').empty()
+                $('#parti-button').append('<button id="show-info" onclick="gotoinfo()"> 게시판보기</button>')
+                orderMode = true
+            }
+            
+        }
+        function gotoinfo() {
+            alert('게시판으로갑니다')
+
+        }
+    </script>
 </head>
 
 <body>
@@ -48,17 +99,19 @@
             <hr width = "100%" color = "black">
         <div style = "width:180px; border: 1px dotted;"> <div class = "lefttextbox"> 뭐 먹을지 모르겠을때!</div></div>
 
+        {% for order in orders %}
         <div class="card">
             <div class="card-header">
-              혼자/함께 먹어요
+              {{ order.withwho }} 먹어요
             </div>
             <div class="card-body">
               <h5 class="card-title">날짜 & 시간</h5>
-              <p class="card-text">식당/메뉴/주문자명</p>
+              <p class="card-text">{{ order.restaurant }}/{{ order.menu }}/주문자명</p>
               <p class="card-text">최대 n명중 m명 참여! (m/n)</p>
-              <a href="#" class="btn btn-primary">참여하기!</a>
+              <div id = "parti-button" onclick="changeParti()"> <button> 참여하기</button> </div> 
             </div>
-          </div>
+        </div>
+        {% endfor %}
           
     </div>
     
