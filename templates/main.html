@@ -85,21 +85,7 @@
         }
 
         function go_write() {
-            $.ajax({
-                type: "GET",
-                url: "/write",
-                data: {},
-                success: function (response) {
-                    if (response['result'] == 'success') {
-                        // 로그인한 사용자면 닉네임을 보여주는 알람을 띄움!
-                        let nickname = response['nickname']
-                        alert(`반갑습니다 ${nickname}님!!`)
-                    } else {
-                        alert(response['msg'])
-                        
-                    }
-                }
-            })
+            window.location.href = '/write'
         }
     </script>
 </head>
