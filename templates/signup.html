@@ -78,6 +78,7 @@
         
             if (emailCheck(email)) {
                 resultDiv.innerHTML = '유효한 이메일 주소입니다.';
+                $('#signup-button').append('<button type="submit" onclick="signup()" class="btn btn-primary">회원가입</button>')
             } else {
                 resultDiv.innerHTML = '유효하지 않은 이메일 주소입니다.';
             }
@@ -108,7 +109,7 @@
                 <input type="password" class="form-control" aria-describedby="emailHelp"
                        id="input-password" autocomplete="current-password" placeholder="">
             </div>
-            <button type="submit" onclick="signup()" class="btn btn-primary">회원가입</button>
+            <div id = "signup-button"> </div>
         </div>
     </div>
 </div>
