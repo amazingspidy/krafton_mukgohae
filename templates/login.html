@@ -65,6 +65,10 @@
                 }
             })
         }
+
+        function signup(){
+            window.location.href = '/signup'
+        }
     </script>
 </head>
 
@@ -85,6 +89,7 @@
                        id="input-password" autocomplete="current-password" placeholder="">
             </div>
             <button type="submit" onclick="login()" class="btn btn-primary">로그인</button>
+            <button type="submit" onclick="signup()" class="btn btn-primary">회원가입</button>
         </div>
     </div>
 </div>
