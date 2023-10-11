@@ -32,39 +32,70 @@
         .lefttextbox {
             text-align: left;
         }
+        .inlining {
+          display: inline;
+        }
     </style>
 </head>
 
 <body>
     <div class = "rightbutton">
         <button>로그아웃</button> 
-        <div class="card">
-            <div class="card-header">
-              혼자/함께 먹어요
-            </div>
-            <div class="card-body">
-              <h5 class="card-title">날짜 & 시간</h5>
-              <p class="card-text">식당/메뉴/주문자명</p>
-              <p class="card-text">최대 n명중 m명 참여! (m/n)</p>
-            </div>
-          </div>
-          <div class="input-group mb-3">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="inputGroup-sizing-default">장소</span>
-            </div>
-            <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
-          </div>
-          
-          <div class="input-group mb-3">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="inputGroup-sizing-default">계좌정보</span>
-            </div>
-            <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
-          </div>
-          <button>수정하기</button> 
-        
+        <div class="form-group">
+          <label for="exampleFormControlSelect1">카테고리선택</label>
+          <select multiple class="form-control" id="exampleFormControlSelect1">
+            <option>치킨</option>
+            <option>햄버거</option>
+            <option>족발/보쌈</option>
+            <option>중식</option>
+            <option>피자</option>
+            <option>분식</option>
+            <option>일식</option>
+            <option>디저트</option>
+            <option>기타</option>
+          </select>
+        </div>
 
+        <div class="form-group">
+          <label for="exampleFormControlSelect1">함께먹나요?</label>
+          <select multiple class="form-control" id="exampleFormControlSelect1">
+            <option>네</option>
+            <option>아니오</option>
+          </select>
+        </div>
+        
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">식당이름</span>
+          </div>
+          <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">메뉴이름</span>
+          </div>
+          <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">목표인원</span>
+          </div>
+          <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+
+
+
+
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">최대인원</span>
+          </div>
+          <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
           
+        <button>입력하기</button> 
           
     </div>
     
