@@ -2,21 +2,15 @@
 <html lang="ko">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
-        integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
-
-    <!-- Optional JavaScript -->
-    <!-- jQuery and Bootstrap Bundle (includes Popper) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
-        crossorigin="anonymous"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+          crossorigin="anonymous"></script>
     <title>먹고해 | 글쓰기페이지</title>
     <style>
         .rightbutton {
@@ -36,6 +30,8 @@
           display: inline;
         }
     </style>
+
+
 </head>
 
 <body>
@@ -43,7 +39,7 @@
         <button>로그아웃</button> 
         <div class="form-group">
           <label for="exampleFormControlSelect1">카테고리선택</label>
-          <select multiple class="form-control" id="exampleFormControlSelect1">
+          <select multiple class="form-control" id="food_category">
             <option>치킨</option>
             <option>햄버거</option>
             <option>족발/보쌈</option>
@@ -58,7 +54,7 @@
 
         <div class="form-group">
           <label for="exampleFormControlSelect1">함께먹나요?</label>
-          <select multiple class="form-control" id="exampleFormControlSelect1">
+          <select multiple class="form-control" id="with_who">
             <option>네</option>
             <option>아니오</option>
           </select>
@@ -66,23 +62,23 @@
         
         <div class="input-group mb-3">
           <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-default">식당이름</span>
+            <span class="input-group-text">식당이름</span>
           </div>
-          <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+          <input type="text" id="food_shop" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
         </div>
 
         <div class="input-group mb-3">
           <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-default">메뉴이름</span>
+            <span class="input-group-text" >메뉴이름</span>
           </div>
-          <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+          <input type="text" id="food_name" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
         </div>
 
         <div class="input-group mb-3">
           <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-default">목표인원</span>
+            <span class="input-group-text" >목표인원</span>
           </div>
-          <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+          <input type="text" id="ppl_num_aim" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
         </div>
 
 
@@ -90,12 +86,12 @@
 
         <div class="input-group mb-3">
           <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-default">최대인원</span>
+            <span class="input-group-text" >최대인원</span>
           </div>
-          <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+          <input type="text" id="ppl_num_max" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
         </div>
           
-        <button>입력하기</button> 
+        <button onclick="write_order()">입력하기</button> 
           
     </div>
     
@@ -104,5 +100,40 @@
     
 </body>
 
+<script>
+  function write_order() {
+      
+      var food_category = $("select[id=food_category] option:selected").text();
+      var with_who = $("select[id=with_who] option:selected").text();
+      var food_shop = $('#food_shop').val();
+      var food_name = $('#food_name').val();
+      var ppl_num_aim = $('#ppl_num_aim').val();
+      var ppl_num_max = $('#ppl_num_max').val();
+
+      $.ajax({
+          type: "POST",
+          url: "/write",
+          data: {
+            'food_category': food_category,
+            'with_who': with_who,
+            'food_shop': food_shop,
+            'food_name': food_name,
+            'ppl_num_aim': ppl_num_aim,
+            'ppl_num_max': ppl_num_max
+          },
+          success: function (response) {
+              console.log(response)
+              if (response['result'] == 'success') {
+                  alert('업로드 되었습니다.');
+                  window.location.href = '/';
+              } else {
+                  alert(response['msg']);
+              }
+          }
+      });
+  }
+
+  
+</script>
 
 </html>
