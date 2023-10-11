@@ -1,26 +1,15 @@
-from bson import ObjectId
+from flask import Flask, render_template, jsonify, request, session, redirect, url_for
+import jwt
+import datetime
+import hashlib
 from pymongo import MongoClient
 
-from flask import Flask, render_template, request,  redirect, url_for
-from flask.json.provider import JSONProvider
-from flask_restful import Resource, Api
-from flask_pymongo import PyMongo
-from flask_jwt_extended import (JWTManager, jwt_required, create_access_token, get_jwt_identity
-)
-from werkzeug.security import generate_password_hash, check_password_hash
-
-import json
-import sys
-
+SECRET_KEY = 'MUKGOHAE'
 
 app = Flask(__name__)
 
 # MongoDB에 연결
 client = MongoClient('localhost', 27017)
-
-# JWT 시크릿 키 설정
-app.config['JWT_SECRET_KEY'] = 'your-secret-key'
-jwt = JWTManager(app)
 
 # 데이터베이스 생성
 db = client.dbmukgohae
@@ -32,23 +21,23 @@ db = client.dbmukgohae
 # ObjectId 타입으로 되어있는 _id 필드는 Flask 의 jsonify 호출시 문제가 된다.
 # 이를 처리하기 위해서 기본 JsonEncoder 가 아닌 custom encoder 를 사용한다.
 # Custom encoder 는 다른 부분은 모두 기본 encoder 에 동작을 위임하고 ObjectId 타입만 직접 처리한다.
-class CustomJSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, ObjectId):
-            return str(o)
-        return json.JSONEncoder.default(self, o)
+# class CustomJSONEncoder(json.JSONEncoder):
+#     def default(self, o):
+#         if isinstance(o, ObjectId):
+#             return str(o)
+#         return json.JSONEncoder.default(self, o)
 
 
-class CustomJSONProvider(JSONProvider):
-    def dumps(self, obj, **kwargs):
-        return json.dumps(obj, **kwargs, cls=CustomJSONEncoder)
+# class CustomJSONProvider(JSONProvider):
+#     def dumps(self, obj, **kwargs):
+#         return json.dumps(obj, **kwargs, cls=CustomJSONEncoder)
 
-    def loads(self, s, **kwargs):
-        return json.loads(s, **kwargs)
+#     def loads(self, s, **kwargs):
+#         return json.loads(s, **kwargs)
 
 
 # 위에 정의되 custom encoder 를 사용하게끔 설정한다.
-app.json = CustomJSONProvider(app)
+# app.json = CustomJSONProvider(app)
 
 # 여기까지 이해 못해도 그냥 넘어갈 코드입니다.
 # #####################################################################################
@@ -61,54 +50,82 @@ app.json = CustomJSONProvider(app)
 
 # API #1: HTML 틀(template) 전달
 #         틀 안에 데이터를 채워 넣어야 하는데 이는 아래 이어지는 /api/list 를 통해 이루어집니다.
+
+
 @app.route('/')
 def home():
     return render_template('main.html')
 
-@app.route('/signup', methods=['POST', 'GET'])
-def signup():
-    if request.method == 'POST':
-        email = request.form['email']
-        username = request.form['username']
-        password = request.form['password']
-        password_hash = generate_password_hash(password)
-        
-        # 이미 존재하는 이메일인지 확인
-        if db.users.find_one({'email': email}):
-            return '이미 존재하는 이메일 주소입니다.'
-        
-        # 이미 존재하는 사용자 이름인지 확인
-        if db.users.find_one({'username': username}):
-            return '이미 존재하는 사용자 이름입니다.'
-        
-        # 이메일, 사용자 이름, 해시된 비밀번호를 데이터베이스에 저장
-        db.users.insert_one({'email': email, 'username': username, 'password': password_hash})
-        
-        return redirect(url_for('login'))
-    
-    return render_template('signup.html')
-
-
-@app.route('/login', methods=['POST', 'GET'])
+@app.route('/login')
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = db.users.find_one({'username': username})
-        if user and check_password_hash(user['password'], password):
-            access_token = create_access_token(identity=username)
-            return f'로그인 성공! 토큰: {access_token}'
-        return '올바르지 않은 사용자 이름 또는 비밀번호입니다.'
     return render_template('login.html')
 
-@app.route('/dashboard')
-@jwt_required
-def dashboard():
-    current_user = get_jwt_identity()
-    return f'로그인 성공! 대시보드에 오신 것을 환영합니다, {current_user}!'
+@app.route('/signup')
+def signup():
+    return render_template('signup.html')
 
+# 회원가입
+@app.route('/api/signup', methods=['POST'])
+def api_register():
+    email_receive = request.form['email_give']
+    pw_receive = request.form['pw_give']
+    nickname_receive = request.form['nickname_give']
+    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
+
+    # 이미 존재하는 아이디면 패스!
+    result = db.user.find_one({'email': email_receive})
+    if result is not None:
+        return jsonify({'result': 'fail', 'msg': '이미 존재하는 EMAIL입니다!'})
+    else:
+        db.user.insert_one({'email': email_receive, 'pw': pw_hash, 'nick': nickname_receive})
+        return jsonify({'result': 'success'})
+
+
+# 로그인
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    email_receive = request.form['email_give']
+    pw_receive = request.form['pw_give']
+
+    # 회원가입 때와 같은 방법으로 pw를 암호화합니다.
+    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
+
+    # email, 암호화된pw을 가지고 해당 유저를 찾습니다.
+    result = db.user.find_one({'email': email_receive, 'pw': pw_hash})
+
+    # 찾으면 JWT 토큰을 만들어 발급합니다.
+    if result is not None:
+        # JWT 토큰 생성
+        payload = {
+            'email': email_receive,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=100)
+        }
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+
+        # token을 줍니다.
+        return jsonify({'result': 'success', 'token': token})
+    # 찾지 못하면
+    else:
+        return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
+
+
+# 보안: 로그인한 사용자만 통과할 수 있는 API
+@app.route('/api/isAuth', methods=['GET'])
+def api_valid():
+    token_receive = request.cookies.get('mytoken')
+    try:
+        # token을 시크릿키로 디코딩합니다.
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        # payload 안에 email가 들어있습니다. 이 email로 유저정보를 찾습니다.
+        userinfo = db.user.find_one({'email': payload['email']}, {'_email': 0})
+        return jsonify({'result': 'success', 'nickname': userinfo['nick']})
+    except jwt.ExpiredSignatureError:
+        # 위를 실행했는데 만료시간이 지났으면 에러가 납니다.
+        return jsonify({'result': 'fail', 'msg': '로그인 시간이 만료되었습니다.'})
+    except jwt.exceptions.DecodeError:
+        # 로그인 정보가 없으면 에러가 납니다!
+        return jsonify({'result': 'fail', 'msg': '로그인 정보가 존재하지 않습니다.'})
+    
 
 if __name__ == '__main__':
-    print(sys.executable)
-    app.secret_key = 'your-secret-key'
     app.run('0.0.0.0', port=5000, debug=True)
