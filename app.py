@@ -15,14 +15,15 @@ import sys
 
 app = Flask(__name__)
 
-app.config['MONGO_URI'] = 'mongodb://localhost:27017/your_database_name'
+# MongoDB에 연결
+client = MongoClient('localhost', 27017)
+
+# JWT 시크릿 키 설정
 app.config['JWT_SECRET_KEY'] = 'your-secret-key'
-mongo = PyMongo(app)
-api = Api(app)
 jwt = JWTManager(app)
 
-client = MongoClient('localhost', 27017)
-db = client.dbjungle
+# 데이터베이스 생성
+db = client.dbmukgohae
 
 
 #####################################################################################
@@ -67,13 +68,24 @@ def home():
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
     if request.method == 'POST':
+        email = request.form['email']
         username = request.form['username']
         password = request.form['password']
         password_hash = generate_password_hash(password)
-        if mongo.db.users.find_one({'username': username}):
-            return '이미 존재하는 사용자입니다.'
-        mongo.db.users.insert_one({'username': username, 'password': password_hash})
+        
+        # 이미 존재하는 이메일인지 확인
+        if db.users.find_one({'email': email}):
+            return '이미 존재하는 이메일 주소입니다.'
+        
+        # 이미 존재하는 사용자 이름인지 확인
+        if db.users.find_one({'username': username}):
+            return '이미 존재하는 사용자 이름입니다.'
+        
+        # 이메일, 사용자 이름, 해시된 비밀번호를 데이터베이스에 저장
+        db.users.insert_one({'email': email, 'username': username, 'password': password_hash})
+        
         return redirect(url_for('login'))
+    
     return render_template('signup.html')
 
 
@@ -82,7 +94,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        user = mongo.db.users.find_one({'username': username})
+        user = db.users.find_one({'username': username})
         if user and check_password_hash(user['password'], password):
             access_token = create_access_token(identity=username)
             return f'로그인 성공! 토큰: {access_token}'
