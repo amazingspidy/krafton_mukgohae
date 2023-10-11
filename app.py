@@ -73,6 +73,11 @@ def login():
 def signup():
     return render_template('signup.html')
 
+
+@app.route('/write')
+def write():
+    return render_template('write.html')
+
 # 회원가입
 @app.route('/api/signup', methods=['POST'])
 def api_register():
@@ -135,6 +140,31 @@ def api_valid():
         # 로그인 정보가 없으면 에러가 납니다!
         return jsonify({'result': 'fail', 'msg': '로그인 정보가 존재하지 않습니다.'})
     
+
+
+
+
+@app.route('/write', methods=['POST'])
+def write_order():
+    print('test',request.form)
+    food_category = request.form['food_category']
+    with_who = request.form['with_who']
+    food_shop = request.form['food_shop']
+    food_name = request.form['food_name']
+    ppl_num_aim = request.form['ppl_num_aim']
+    ppl_num_max = request.form['ppl_num_max']
+
+    
+
+    
+    
+    db.order.insert_one({'food_category': food_category,
+                         'with_who': with_who,
+                         'food_shop': food_shop,
+                         'food_name': food_name,
+                         'ppl_num_aim': ppl_num_aim,
+                         'ppl_num_max': ppl_num_max })
+    return jsonify({'result': 'success'})
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
