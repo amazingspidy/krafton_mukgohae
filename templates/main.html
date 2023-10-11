@@ -48,17 +48,19 @@
             <hr width = "100%" color = "black">
         <div style = "width:180px; border: 1px dotted;"> <div class = "lefttextbox"> 뭐 먹을지 모르겠을때!</div></div>
 
+        {% for order in orders %}
         <div class="card">
             <div class="card-header">
-              혼자/함께 먹어요
+              {{ order.withwho }} 먹어요
             </div>
             <div class="card-body">
               <h5 class="card-title">날짜 & 시간</h5>
-              <p class="card-text">식당/메뉴/주문자명</p>
+              <p class="card-text">{{ order.restaurant }}/{{ order.menu }}/주문자명</p>
               <p class="card-text">최대 n명중 m명 참여! (m/n)</p>
               <a href="#" class="btn btn-primary">참여하기!</a>
             </div>
-          </div>
+        </div>
+        {% endfor %}
           
     </div>
     

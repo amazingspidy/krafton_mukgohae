@@ -54,7 +54,10 @@ db = client.dbmukgohae
 
 @app.route('/')
 def home():
-    return render_template('main.html')
+    orders = [{'withwho':'함께',
+              'restaurant':'홍콩반점',
+              'menu':'꿔바로우'}]
+    return render_template('main.html', orders=orders)
 
 @app.route('/login')
 def login():
