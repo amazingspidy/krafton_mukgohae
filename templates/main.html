@@ -12,23 +12,37 @@
     <!-- Optional JavaScript -->
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
     <script src="https://code.jquery.com/jquery-3.5.1.js"> </script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
             integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
             crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet">
     <title>먹고해 | 메인페이지</title>
     <style>
+       
+        * {
+            font-family: 'Nanum Gothic', sans-serif;
+            margin : 5px;
+        }
+        .wrap {
+            width: 500px;
+            margin: 20px auto 0 auto;
+        }
+
         .rightbutton {
-            width: 390px;
+            width: 500px;
             
             text-align: right;
         }
         .centerbutton {
-            width: 390px;
+            width: 500px;
             
             text-align: center;
         }
         .lefttextbox {
             text-align: left;
+        }
+        .centerbutton {
+            margin: 5px;
         }
     </style>
     
@@ -272,12 +286,13 @@
 </script>
 
 <body>
+<div class="wrap">
     <div class = "rightbutton">
          <!-- 로그인 상태에 따라 로그아웃 또는 로그인 버튼을 표시 -->
         {% if user_email %}
             <p>안녕하세요, {{ user_email }}님!</p>
-            <button onclick="logout()">로그아웃</button>
-            <button id="write-order" onclick="go_write()">글쓰기</button>
+            <button onclick="logout()" class="btn btn-outline-secondary">로그아웃</button>
+            <button id="write-order" onclick="go_write()" class="btn btn-outline-info">글쓰기</button>
 
         </div>
         {% else %}
@@ -293,19 +308,25 @@
             <div style = "width:180px; border: 1px dotted;"> <div class = "lefttextbox"> 먹고싶은걸 고르셨다면?</div></div>
             <hr width = "100%" color = "black">
             
+        
 
-            <div class = "centerbutton">
-                <button onclick="return_chicken()" > 치킨 </button><button onclick="return_burger()""> 햄버거 </button>
-                <button onclick="return_jokbo()"> 족발/보쌈 </button><button onclick="return_china()"> 중식 </button> <br>
-                <button onclick="return_pizza()"> 피자 </button><button onclick="return_boonsik()"> 분식 </button>
-                <button onclick="return_japan()"> 일식 </button><button onclick="return_dessert()" > 디저트 </button>
-                <button onclick="return_etc()"> 기타 </button>
-                
+            <div class="centerbutton">
+                <button class="btn btn-warning" onclick="return_chicken()" style="margin: 5px;">치킨</button>
+                <button class="btn btn-warning" onclick="return_burger()" style="margin: 5px;">햄버거</button>
+                <button class="btn btn-warning" onclick="return_jokbo()" style="margin: 5px;">족발/보쌈</button>
+                <button class="btn btn-warning" onclick="return_china()" style="margin: 5px;">중식</button><br>
+                <button class="btn btn-warning" onclick="return_pizza()" style="margin: 5px;">피자</button>
+                <button class="btn btn-warning" onclick="return_boonsik()" style="margin: 5px;">분식</button>
+                <button class="btn btn-warning" onclick="return_japan()" style="margin: 5px;">일식</button>
+                <button class="btn btn-warning" onclick="return_dessert()" style="margin: 5px;">디저트</button>
+                <button class="btn btn-warning" onclick="return_etc()" style="margin: 5px;">기타</button>
             </div>
+            
             <hr width = "100%" color = "black">
         <div style = "width:180px; border: 1px dotted;"> <div class = "lefttextbox"> 뭐 먹을지 모르겠을때!</div></div>
         <div id = "orders-list"> </div>   
     </div>
+</div>
 </body>
 
 

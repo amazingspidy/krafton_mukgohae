@@ -13,13 +13,22 @@
 
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
     <script src="https://code.jquery.com/jquery-3.5.1.js"> </script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
             integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
             crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet">
+
     <title>먹고해 | 정보게시판페이지</title>
     <style>
+        * {
+            font-family: 'Nanum Gothic', sans-serif;
+        }
+        .wrap {
+            width: 500px;
+            margin: 20px auto 0 auto;
+        }
         .rightbutton {
-            width: 390px;
+            width: 500px;
             
             text-align: right;
         }
@@ -114,6 +123,22 @@
                     let temp_html = `
                     <div class="card">
 
+<body>
+  <div class="wrap">
+    <div class = "rightbutton">
+      <!-- 로그인 상태에 따라 로그아웃 또는 로그인 버튼을 표시 -->
+        {% if user_email %}
+            <p>안녕하세요, {{ user_email }}님!</p>
+            <button onclick="logout()">로그아웃</button>
+        </div>
+        {% else %}
+        <div class="rightbutton">
+          <button onclick="go_login()">로그인</button>
+        </div>
+        {% endif %}  {# if 블록 닫기 #}
+          <div class="card">
+
+
               <div class="card-header">
                 함께먹나요? ${orders['with_who']}
               </div>
@@ -163,9 +188,11 @@
           <p>공지사항을 댓글을 통해 전달하세요!</p>
           
         </div>
+
       </div>
         <div id = "show-mypage"> </div>
           
+
     </div>
 </body>
 </html>
