@@ -46,7 +46,6 @@ def read_orders():
     result = list(db.order.find({}))
 
     for i in result:
-        print('latte : ', i)
         i['_id'] = str(i['_id'])
 
     for order in result:
