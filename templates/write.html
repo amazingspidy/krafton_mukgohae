@@ -34,9 +34,94 @@
 
 </head>
 
+<script>
+
+  $(document).ready(function () {
+              hello()
+          });
+
+  function write_order() {
+      var order_date = $('#order_date').val();
+      var order_time = $('#order_time').val();
+      var food_category = $("select[id=food_category] option:selected").text();
+      var with_who = $("select[id=with_who] option:selected").text();
+      var food_shop = $('#food_shop').val();
+      var food_name = $('#food_name').val();
+      var ppl_num_aim = $('#ppl_num_aim').val();
+      var ppl_num_max = $('#ppl_num_max').val();
+      console.log(order_date, order_time)
+      $.ajax({
+          type: "POST",
+          url: "/write",
+          data: {
+            'order_date': order_date,
+            'order_time': order_time,
+            'food_category': food_category,
+            'with_who': with_who,
+            'food_shop': food_shop,
+            'food_name': food_name,
+            'ppl_num_aim': ppl_num_aim,
+            'ppl_num_max': ppl_num_max,
+            'ppl_num_now': 1
+          },
+          success: function (response) {
+              console.log(response)
+              if (response['result'] == 'success') {
+
+                  alert('업로드 되었습니다. 메인페이지로 이동합니다.');
+                  window.location.href = '/';
+              } else {
+                  alert(response['msg']);
+              }
+          }
+      });
+  }
+  function hello() {
+            $.ajax({
+                type: "GET",
+                url: "/api/secure",
+                data: {},
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        // 로그인한 사용자면 닉네임을 보여주는 알람을 띄움!
+                        let nickname = response['nickname']
+                        alert(`반갑습니다 ${nickname}님!!`)
+                    } else {
+                        alert(response['message'])
+                        window.location.href = '/login'
+                    }
+                }
+            })
+        }
+  function logout() {
+    $.ajax({
+                type: "GET",
+                url: "/logout",
+                data: {},
+                success: function (response) {
+                    // 로그아웃이 성공한 경우 페이지 새로고침
+                    window.location.reload();
+                }
+            })
+        }
+  
+</script>
+
 <body>
     <div class = "rightbutton">
-        <button>로그아웃</button> 
+         <!-- 로그인 상태에 따라 로그아웃 또는 로그인 버튼을 표시 -->
+      {% if 'email' in session %}
+      <button onclick="logout()">로그아웃</button>
+      {% else %}
+      <button onclick="go_login()">로그인</button>
+      {% endif %}  {# if 블록 닫기 #}
+        <div class="input-group mb-3">
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">날짜</span>
+
+
+
         <div class="input-group mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text">날짜</span>
@@ -114,44 +199,6 @@
     
 </body>
 
-<script>
-  function write_order() {
-      var order_date = $('#order_date').val();
-      var order_time = $('#order_time').val();
-      var food_category = $("select[id=food_category] option:selected").text();
-      var with_who = $("select[id=with_who] option:selected").text();
-      var food_shop = $('#food_shop').val();
-      var food_name = $('#food_name').val();
-      var ppl_num_aim = $('#ppl_num_aim').val();
-      var ppl_num_max = $('#ppl_num_max').val();
-      console.log(order_date, order_time)
-      $.ajax({
-          type: "POST",
-          url: "/write",
-          data: {
-            'order_date': order_date,
-            'order_time': order_time,
-            'food_category': food_category,
-            'with_who': with_who,
-            'food_shop': food_shop,
-            'food_name': food_name,
-            'ppl_num_aim': ppl_num_aim,
-            'ppl_num_max': ppl_num_max
-          },
-          success: function (response) {
-              console.log(response)
-              if (response['result'] == 'success') {
 
-                  alert('업로드 되었습니다. 메인페이지로 이동합니다.');
-                  window.location.href = '/';
-              } else {
-                  alert(response['msg']);
-              }
-          }
-      });
-  }
-
-  
-</script>
 
 </html>

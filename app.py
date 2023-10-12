@@ -7,12 +7,13 @@ import jwt
 import datetime
 import hashlib
 from pymongo import MongoClient
-
+from bson import ObjectId
 
 # JWT 토큰을 만들 때 필요한 비밀문자열
-SECRET_KEY = 'MUKGOHAE'
+
 
 app = Flask(__name__)
+app.secret_key = 'MUKGOHAE'
 
 # MongoDB에 연결
 client = MongoClient('localhost', 27017)
@@ -60,11 +61,39 @@ db = client.dbmukgohae
 
 @app.route('/')
 def home():
-    orders = [{'withwho':'함께',
-              'restaurant':'홍콩반점',
-              'menu':'꿔바로우'}]
+    user_email = session.get('email', None)
+    result = list(db.order.find({}))
+    return render_template('main.html', orders=result, user_email=user_email)
+
+@app.route('/list', methods=['GET'])
+def read_orders():
+    result = list(db.order.find({}))
+    for i in result:
+        i['_id'] = str(i['_id'])
+    return jsonify({'result': 'success', 'orders': result})
+
+@app.route('/plus', methods=['POST'])
+def plus_curmem_num():
+     # 1. movies 목록에서 find_one으로 영화 하나를 찾습니다.
+     id_receive = request.form['order_id']
+     
+
+     order = db.order.find_one({'_id': ObjectId(id_receive)})
+     print(order)
+     # 2. movie의 like 에 1을 더해준 new_like 변수를 만듭니다.
+     print(order['ppl_num_now'])
+     print(type(order['ppl_num_now']))
+     
+     # 참고: '$set' 활용하기!
+     new_ppl = int(order['ppl_num_now']) + 1
+     result = db.order.update_one({'_id': ObjectId(id_receive)}, {
+                                    '$set': {'ppl_num_now': new_ppl}})
+
+     if result.modified_count == 1:
+         return jsonify({'result': 'success'})
+     else:
+         return jsonify({'result': 'failure'})
     
-    return render_template('main.html', orders=orders)
 
 @app.route('/login')
 def login():
@@ -108,38 +137,29 @@ def api_login():
     # email, 암호화된pw을 가지고 해당 유저를 찾습니다.
     result = db.user.find_one({'email': email_receive, 'pw': pw_hash})
 
-    # 찾으면 JWT 토큰을 만들어 발급합니다.
     if result is not None:
-        # JWT 토큰 생성
-        payload = {
-            'email': email_receive,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=100)
-        }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-
-        # token을 줍니다.
-        return jsonify({'result': 'success', 'token': token})
-    # 찾지 못하면
+        # 사용자가 인증되었을 때 세션 또는 쿠키를 설정
+        session['email'] = email_receive
+        return jsonify({'result': 'success', 'message': '로그인 성공'})
     else:
-        return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
+        return jsonify({'result': 'fail', 'message': '아이디 또는 비밀번호가 일치하지 않습니다.'})
 
+#로그아웃
+@app.route('/logout')
+def logout():
+    session.pop('email', None)  # 세션에서 사용자 정보 삭제
+    return redirect(url_for('login'))  # 로그인 페이지로 리디렉션
 
-# 보안: 로그인한 사용자만 통과할 수 있는 API
-@app.route('/api/isAuth', methods=['GET'])
-def api_valid():
-    token_receive = request.cookies.get('mytoken')
-    try:
-        # token을 시크릿키로 디코딩합니다.
-        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-        # payload 안에 email가 들어있습니다. 이 email로 유저정보를 찾습니다.
-        userinfo = db.user.find_one({'email': payload['email']}, {'_email': 0})
-        return jsonify({'result': 'success', 'nickname': userinfo['nick']})
-    except jwt.ExpiredSignatureError:
-        # 위를 실행했는데 만료시간이 지났으면 에러가 납니다.
-        return jsonify({'result': 'fail', 'msg': '로그인 시간이 만료되었습니다.'})
-    except jwt.exceptions.DecodeError:
-        # 로그인 정보가 없으면 에러가 납니다!
-        return jsonify({'result': 'fail', 'msg': '로그인 정보가 존재하지 않습니다.'})
+#인증
+@app.route('/api/secure', methods=['GET'])
+def secure_api():
+    if 'email' in session:
+        # 사용자가 로그인되어 있을 때만 접근 가능
+        return jsonify({'result': 'success', 'message': '인증된 사용자입니다.'})
+        
+    else:
+        return jsonify({'result': 'fail', 'message': '인증이 필요합니다.'})
+    
     
 
 
@@ -157,7 +177,7 @@ def write_order():
     food_name = request.form['food_name']
     ppl_num_aim = request.form['ppl_num_aim']
     ppl_num_max = request.form['ppl_num_max']
-
+    ppl_num_now = request.form['ppl_num_now']
     
 
     db.order.insert_one({'order_date': order_date,
@@ -167,14 +187,32 @@ def write_order():
                          'food_shop': food_shop,
                          'food_name': food_name,
                          'ppl_num_aim': ppl_num_aim,
-                         'ppl_num_max': ppl_num_max })
+                         'ppl_num_max': ppl_num_max,
+                         'ppl_num_now': ppl_num_now})
     return jsonify({'result': 'success'})
 
+# @app.route('/list', methods=['GET'])
+# def read_orders():
+#     current_date = str(datetime.now().date()).replace('-','')
+#     current_time = str(datetime.now().strftime("%H%M"))
+#     current_datetime = current_date + current_time
+    
+#     order_datetime = ''
+    
+#     valid_orders = []
 
-@app.route('/list', methods=['GET'])
-def read_orders():
-    result = list(db.order.find({}, {'_id':0}))
-    return jsonify({'result': 'success', 'orders': result})
+#     result = list(db.order.find({}, {'_id':0}))
+
+#     for order in result:
+#         order_date = order['order_date'].replace('-','')
+#         order_time = order['order_time'].replace(':','')
+#         order_datetime = order_date + order_time
+#         print('order_datetime : ', order_datetime)
+#         if (int(order_datetime) > int(current_datetime)):
+#             valid_orders.append(order)
+#             print('valid_orders', valid_orders)
+    
+#     return jsonify({'result': 'success', 'orders': valid_orders})
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
