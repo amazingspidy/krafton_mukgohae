@@ -63,6 +63,7 @@ def home():
     orders = [{'withwho':'함께',
               'restaurant':'홍콩반점',
               'menu':'꿔바로우'}]
+    
     return render_template('main.html', orders=orders)
 
 @app.route('/login')
@@ -146,7 +147,10 @@ def api_valid():
 
 @app.route('/write', methods=['POST'])
 def write_order():
+    
     print('test',request.form)
+    order_date = request.form['order_date']
+    order_time = request.form['order_time']
     food_category = request.form['food_category']
     with_who = request.form['with_who']
     food_shop = request.form['food_shop']
@@ -156,15 +160,21 @@ def write_order():
 
     
 
-    
-    
-    db.order.insert_one({'food_category': food_category,
+    db.order.insert_one({'order_date': order_date,
+                         'order_time': order_time,
+                         'food_category': food_category,
                          'with_who': with_who,
                          'food_shop': food_shop,
                          'food_name': food_name,
                          'ppl_num_aim': ppl_num_aim,
                          'ppl_num_max': ppl_num_max })
     return jsonify({'result': 'success'})
+
+
+@app.route('/list', methods=['GET'])
+def read_orders():
+    result = list(db.order.find({}, {'_id':0}))
+    return jsonify({'result': 'success', 'orders': result})
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)

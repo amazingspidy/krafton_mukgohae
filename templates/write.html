@@ -37,6 +37,20 @@
 <body>
     <div class = "rightbutton">
         <button>로그아웃</button> 
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text">날짜</span>
+          </div>
+          <input type="date" id="order_date" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text">시간</span>
+          </div>
+          <input type="time" id="order_time" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+
         <div class="form-group">
           <label for="exampleFormControlSelect1">카테고리선택</label>
           <select multiple class="form-control" id="food_category">
@@ -102,18 +116,21 @@
 
 <script>
   function write_order() {
-      
+      var order_date = $('#order_date').val();
+      var order_time = $('#order_time').val();
       var food_category = $("select[id=food_category] option:selected").text();
       var with_who = $("select[id=with_who] option:selected").text();
       var food_shop = $('#food_shop').val();
       var food_name = $('#food_name').val();
       var ppl_num_aim = $('#ppl_num_aim').val();
       var ppl_num_max = $('#ppl_num_max').val();
-
+      console.log(order_date, order_time)
       $.ajax({
           type: "POST",
           url: "/write",
           data: {
+            'order_date': order_date,
+            'order_time': order_time,
             'food_category': food_category,
             'with_who': with_who,
             'food_shop': food_shop,
@@ -124,7 +141,8 @@
           success: function (response) {
               console.log(response)
               if (response['result'] == 'success') {
-                  alert('업로드 되었습니다.');
+
+                  alert('업로드 되었습니다. 메인페이지로 이동합니다.');
                   window.location.href = '/';
               } else {
                   alert(response['msg']);
