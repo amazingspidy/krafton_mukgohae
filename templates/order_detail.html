@@ -10,7 +10,7 @@
         integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
 
     <!-- Optional JavaScript -->
-    
+
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
     <script src="https://code.jquery.com/jquery-3.5.1.js"> </script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
@@ -43,22 +43,20 @@
           });
 
   function hello() {
-            $.ajax({
-                type: "GET",
-                url: "/api/secure",
-                data: {},
-                success: function (response) {
-                    if (response['result'] == 'success') {
-                        // 로그인한 사용자면 닉네임을 보여주는 알람을 띄움!
-                        let nickname = response['nickname']
-                        alert(`반갑습니다 ${nickname}님!!`)
-                    } else {
-                        alert(response['message'])
-                        window.location.href = '/login'
-                    }
+        $.ajax({
+            type: "GET",
+            url: "/api/secure",
+            data: {},
+            success: function (response) {
+                if (response['result'] == 'success') {
+                    console.log(response)
+                } else {
+                    alert(response['msg'])
+                    window.location.href = '/login'
                 }
-            })
-        }        
+            }
+        })
+    }
   
   function go_login() {
         window.location.href = '/login'
@@ -75,17 +73,47 @@
                 }
             })
         }
-                  
+        // 업데이트 수정 예정
+  // function update_order() {
+  //     var place = $('#place').val();
+  //     var accout_num = $('#accout_num').val();
+
+  //     console.log(place, accout_num)
+  //     $.ajax({
+  //         type: "POST",
+  //         url: "/update_order",
+  //         data: {
+  //           'place': place,
+  //           'accout_num': accout_num,
+
+  //         },
+  //         success: function (response) {
+  //             console.log(response)
+  //             if (response['result'] == 'success') {
+
+  //                 alert('수정되었습니다.');
+  //                 window.location.href = '/order_detail';
+  //             } else {
+  //                 alert(response['msg']);
+  //             }
+  //         }
+  //     });
+  // }   
 </script>
 
 <body>
     <div class = "rightbutton">
       <!-- 로그인 상태에 따라 로그아웃 또는 로그인 버튼을 표시 -->
-        {% if 'email' in session %}
-        <button onclick="logout()">로그아웃</button>
+        {% if user_email %}
+            <p>안녕하세요, {{ user_email }}님!</p>
+            <button onclick="logout()">로그아웃</button>
+            <button id="write-order" onclick="go_write()">글쓰기</button>
+        </div>
         {% else %}
-        <button onclick="go_login()">로그인</button>
-        {% endif %}  {# if 블록 닫기 #}  
+        <div class="rightbutton">
+          <button onclick="go_login()">로그인</button>
+        </div>
+        {% endif %}  {# if 블록 닫기 #}
           <div class="card">
               <div class="card-header">
                 혼자/함께 먹어요
@@ -97,18 +125,18 @@
             </div>
             <div class="input-group mb-3">
               <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup-sizing-default">장소</span>
+                <span class="input-group-text" id="place">장소</span>
               </div>
               <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
             </div>
             
             <div class="input-group mb-3">
               <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup-sizing-default">계좌정보</span>
+                <span class="input-group-text" id="accout_num">계좌정보</span>
               </div>
               <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
             </div>
-            <button>수정하기</button> 
+            <button onclick="">수정하기</button> 
             <div class="media">
               
               <div class="media-body">
