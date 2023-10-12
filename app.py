@@ -158,11 +158,20 @@ def write():
     user_email = session.get('email', None)
     return render_template('write.html', user_email=user_email)
 
-
 @app.route('/order_detail')
 def order_detail():
     user_email = session.get('email', None)
-    return render_template('order_detail.html', user_email=user_email)
+    result = list(db.order.find({}))
+    return render_template('order_detail.html', orders=result, user_email=user_email)
+
+
+@app.route('/member_search', methods=['GET'])
+def member_search():
+    user_email = session.get('email', None)
+    result = db.order.find_one({'member_names': user_email}, {'_id':0})
+
+    return jsonify({'result': 'success', 'orders': result})
+    #return render_template('order_detail.html', user_email=user_email)
 
 
 # 회원가입

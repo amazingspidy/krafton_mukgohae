@@ -107,15 +107,15 @@
 
     function changeParti() {
         if (orderMode == false) {
-            alert('참여완료!')
+            
             $('#parti-button').empty()
-            $('#parti-button').append('<button id="show-info" onclick="go_order_detail()"> 게시판보기</button>')
+            $('#parti-button').append('<button id="show-info" onclick="go_order_detail()"> 내주문보기</button>')
             orderMode = true
         }
         
     }
     function go_order_detail() {
-        alert('게시판으로갑니다')
+        
         window.location.href = '/order_detail'
 
     }
@@ -133,7 +133,7 @@
              success: function (response) {
                  if (response['result'] == 'success') {
                      // 2. '좋아요 완료!' 얼럿을 띄웁니다.
-                     alert('현재인원 증가 완료!')
+                     
                      // 3. 변경된 정보를 반영하기 위해 새로고침합니다.
                      //#region showMovie()
             
@@ -153,12 +153,8 @@
              data: { order_id: order_id },
              success: function (response) {
                  if (response['result'] == 'success') {
-                     // 2. '좋아요 완료!' 얼럿을 띄웁니다.
-                     alert('멤버추가완료!')
-                     // 3. 변경된 정보를 반영하기 위해 새로고침합니다.
-                     //#region showMovie()
-            
-                    
+                     
+        
                  } else {
                      alert('추가 실패ㅠㅠ')
                  }

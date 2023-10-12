@@ -40,6 +40,7 @@
 <script>
   $(document).ready(function () {
               hello()
+              get_detail()
           });
 
   function hello() {
@@ -99,6 +100,18 @@
   //         }
   //     });
   // }   
+
+  function get_detail() {
+    $.ajax({
+                type: "GET",
+                url: "/member_search",
+                data: {},
+                success: function (response) {
+                  let orders = response["orders"];
+                    console.log(orders['food_shop'])
+                }
+            })
+        }
 </script>
 
 <body>
@@ -107,7 +120,6 @@
         {% if user_email %}
             <p>안녕하세요, {{ user_email }}님!</p>
             <button onclick="logout()">로그아웃</button>
-            <button id="write-order" onclick="go_write()">글쓰기</button>
         </div>
         {% else %}
         <div class="rightbutton">
