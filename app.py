@@ -1,5 +1,9 @@
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for
 
+# email 모듈
+import smtplib
+from email.mime.text import MIMEText
+
 # JWT 패키지를 사용합니다. (설치해야할 패키지 이름: PyJWT)
 import jwt
 
@@ -74,11 +78,12 @@ def plus_curmem_num():
                                     '$set': {'ppl_num_now': ppl_num_new}})
      
      # send_email()에 넘길 인자 가져오기
-     # 여기요
+     order_owner_email = order['user_email']
      ppl_num_aim = int(order['ppl_num_aim'])
 
-     # 참여하기 누르면 이메일 함수 호출
-     send_email(ppl_num_new, ppl_num_aim)
+     # 목표인원 달성 시 (현재인원 >= 목표인원) send_email() 호출로 이메일 보내기
+     if (ppl_num_new >= ppl_num_aim):
+        send_email(order_owner_email)
 
      if result.modified_count == 1:
          return jsonify({'result': 'success'})
@@ -87,12 +92,34 @@ def plus_curmem_num():
 
     
 # 이메일 함수
-def send_email(ppl_num_new, ppl_num_aim):
+def send_email(order_owner_email):
     
-    # 목표 인원 달성 시 (현재인원 >= 목표인원)
-    # if (ppl_num_new >= ppl_num_aim):
-    return
+    # (*)보낼 메일의 내용과 제목
+    content = """
+    목표인원이 달성되었습니다
+    """
+    title = '목표인원이 달성되었습니다.'
+
+    msg = MIMEText(content)
+    msg['Subject'] = title
+
+    # (*)메일의 발신자 메일 주소, 수신자 메일 주소, 앱비밀번호(발신자) 
+    sender = 'churn82@gmail.com'
+    receiver = order_owner_email
+    app_password = 'dvtj hbej joks nujz'
+
+
+    # 세션 생성
+    with smtplib.SMTP('smtp.gmail.com', 587) as s:
+        # TLS 암호화
+        s.starttls()
+
+        # 로그인 인증과 메일 보내기
+        s.login(sender, app_password)
+        s.sendmail(sender, receiver, msg.as_string())
         
+    
+
     
     
 
