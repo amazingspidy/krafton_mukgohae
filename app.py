@@ -76,6 +76,12 @@ def signup():
 def write():
     return render_template('write.html')
 
+
+@app.route('/order_detail')
+def order_detail():
+    return render_template('order_detail.html')
+
+
 # 회원가입
 @app.route('/api/signup', methods=['POST'])
 def api_register():
@@ -127,8 +133,7 @@ def logout():
 def secure_api():
     if 'email' in session:
         # 사용자가 로그인되어 있을 때만 접근 가능
-        return jsonify({'result': 'success', 'message': '인증된 사용자입니다.'})
-        
+        return jsonify({'result': 'success', 'message': '인증된 사용자입니다.'})    
     else:
         return jsonify({'result': 'fail', 'message': '인증이 필요합니다.'})
 
