@@ -105,7 +105,17 @@
     });
 
 
-    
+
+    function changeParti() {
+        if (orderMode == false) {
+            
+            $('#parti-button').empty()
+            $('#parti-button').append('<button id="show-info" onclick="go_order_detail()"> 내주문보기</button>')
+            orderMode = true
+        }
+        
+    }
+
     function go_order_detail() {
         
         window.location.href = '/order_detail'
@@ -192,6 +202,7 @@
           <p class="card-text">최소 ${ppl_num_aim}명 에서 최대 ${ppl_num_max}명까지
             현재인원 ${ppl_num_now}명! </p>
           <div id = "parti-button" onclick="plus_ppl('${_id}'); plus_member('${_id}')"> <button> 참여하기</button> </div> 
+
         </div>
     </div>`;
     
@@ -267,18 +278,18 @@
             <p>안녕하세요, {{ user_email }}님!</p>
             <button onclick="logout()">로그아웃</button>
             <button id="write-order" onclick="go_write()">글쓰기</button>
-            
+
         </div>
         {% else %}
         <div class="rightbutton">
             <button onclick="go_login()">로그인</button>
         </div>
-
         
         {% endif %}  {# if 블록 닫기 #}
         <div class="rightbutton">
             <button onclick="go_order_detail()">내주문확인</button>
         </div>
+
             <div style = "width:180px; border: 1px dotted;"> <div class = "lefttextbox"> 먹고싶은걸 고르셨다면?</div></div>
             <hr width = "100%" color = "black">
             
