@@ -91,10 +91,10 @@ def send_email(ppl_num_new, ppl_num_aim):
     
     # 목표 인원 달성 시 (현재인원 >= 목표인원)
     # if (ppl_num_new >= ppl_num_aim):
+    return
         
     
     
-
 
 
 @app.route('/add_member', methods=['POST'])
