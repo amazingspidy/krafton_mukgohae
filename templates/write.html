@@ -36,7 +36,13 @@
 
 <body>
     <div class = "rightbutton">
-        <button>로그아웃</button> 
+      <!-- 로그인 상태에 따라 로그아웃 또는 로그인 버튼을 표시 -->
+      {% if 'email' in session %}
+      <button onclick="logout()">로그아웃</button>
+      {% else %}
+      <button onclick="go_login()">로그인</button>
+      {% endif %}  {# if 블록 닫기 #}
+  <div class="input-group mb-3">
         <div class="input-group mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text">날짜</span>
@@ -115,6 +121,10 @@
 </body>
 
 <script>
+  $(document).ready(function () {
+            hello()
+        });
+
   function write_order() {
       var order_date = $('#order_date').val();
       var order_time = $('#order_time').val();
@@ -150,8 +160,35 @@
           }
       });
   }
-
-  
+  function hello() {
+            $.ajax({
+                type: "GET",
+                url: "/api/secure",
+                data: {},
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        // 로그인한 사용자면 닉네임을 보여주는 알람을 띄움!
+                        let nickname = response['nickname']
+                        alert(`반갑습니다 ${nickname}님!!`)
+                    } else {
+                        alert(response['message'])
+                        window.location.href = '/login'
+                    }
+                }
+            })
+        }
+  function logout() {
+    $.ajax({
+                type: "GET",
+                url: "/logout",
+                data: {},
+                success: function (response) {
+                    // 로그아웃이 성공한 경우 페이지 새로고침
+                    window.location.reload();
+                }
+            })
+        }
+        
 </script>
 
 </html>

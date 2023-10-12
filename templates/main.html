@@ -41,30 +41,42 @@
         function go_login() {
             window.location.href = '/login'
         }
-        // 로그인에 성공해서 토큰이 있는 경우에만 인사하기!
+        // 이전 JavaScript 함수에서 사용자 인증 확인을 요청하는 함수를 수정
         function hello() {
             $.ajax({
                 type: "GET",
-                url: "/api/isAuth",
+                url: "/api/secure",
                 data: {},
                 success: function (response) {
                     if (response['result'] == 'success') {
                         // 로그인한 사용자면 닉네임을 보여주는 알람을 띄움!
-                        let nickname = response['nickname']
-                        alert(`반갑습니다 ${nickname}님!!`)
+                        console.log(response)
                     } else {
-                        alert(response['msg'])
+                        alert(response['message'])
                         window.location.href = '/login'
                     }
                 }
             })
         }
-    
+        
+        function logout() {
+            $.ajax({
+                type: "GET",
+                url: "/logout",
+                data: {},
+                success: function (response) {
+                    // 로그아웃이 성공한 경우 페이지 새로고침
+                    window.location.reload();
+                }
+            })
+        }
+
 
         $(document).ready(function () {
             // 맨 처음 접속시에는 orderMode 가 False입니다.
             orderMode = false;
             show_orders();
+            hello()
         });
 
 
@@ -139,7 +151,18 @@
 
 <body>
     <div class = "rightbutton">
-        <button>로그아웃</button> <button id = "write-order" onclick = "go_write()">글쓰기</button>
+        <!-- 로그인 상태에 따라 로그아웃 또는 로그인 버튼을 표시 -->
+        {% if user_email %}
+            <p>안녕하세요, {{ user_email }}님!</p>
+            <button onclick="logout()">로그아웃</button>
+            <button id="write-order" onclick="go_write()">글쓰기</button>
+        </div>
+        {% else %}
+        <div class="rightbutton">
+            <button onclick="go_login()">로그인</button>
+            <button id="write-order" onclick="go_write()">글쓰기</button>
+        </div>
+        {% endif %}  {# if 블록 닫기 #}
         <div style = "width:180px; border: 1px dotted;"> <div class = "lefttextbox"> 먹고싶은걸 고르셨다면?</div></div>
         <hr width = "100%" color = "black">
         
