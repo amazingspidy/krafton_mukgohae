@@ -8,6 +8,8 @@ import datetime
 import hashlib
 from pymongo import MongoClient
 
+from datetime import datetime
+
 
 # JWT 토큰을 만들 때 필요한 비밀문자열
 SECRET_KEY = 'MUKGOHAE'
@@ -173,8 +175,34 @@ def write_order():
 
 @app.route('/list', methods=['GET'])
 def read_orders():
+    current_date = str(datetime.now().date()).replace('-','')
+    current_time = str(datetime.now().strftime("%H%M"))
+    current_datetime = current_date + current_time
+    
+    order_datetime = ''
+    
+    valid_orders = []
+
     result = list(db.order.find({}, {'_id':0}))
-    return jsonify({'result': 'success', 'orders': result})
+
+    for order in result:
+        order_date = order['order_date'].replace('-','')
+        order_time = order['order_time'].replace(':','')
+        order_datetime = order_date + order_time
+        print('order_datetime : ', order_datetime)
+        if (int(order_datetime) > int(current_datetime)):
+            valid_orders.append(order)
+            print('valid_orders', valid_orders)
+    
+    return jsonify({'result': 'success', 'orders': valid_orders})
+
+
+    
+    
+        
+        
+    
+    
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
