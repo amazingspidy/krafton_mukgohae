@@ -110,16 +110,20 @@
 
 <body>
     <div class = "rightbutton">
+
          <!-- 로그인 상태에 따라 로그아웃 또는 로그인 버튼을 표시 -->
+
       {% if 'email' in session %}
       <button onclick="logout()">로그아웃</button>
       {% else %}
       <button onclick="go_login()">로그인</button>
       {% endif %}  {# if 블록 닫기 #}
+
         <div class="input-group mb-3">
               <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text">날짜</span>
+
 
 
 
@@ -199,7 +203,6 @@
     
     
 </body>
-
 
 
 </html>
