@@ -119,6 +119,7 @@
     });
 
 
+
     function changeParti() {
         if (orderMode == false) {
             
@@ -128,6 +129,7 @@
         }
         
     }
+
     function go_order_detail() {
         
         window.location.href = '/order_detail'
@@ -175,7 +177,7 @@
              }
          });
     }
-    
+
 
     function show_prefer(sort_mode) {
         console.log('hey!!!')
@@ -213,7 +215,8 @@
           <p class="card-text">${food_shop}에서 ${food_name}을 시켜요!</p>
           <p class="card-text">최소 ${ppl_num_aim}명 에서 최대 ${ppl_num_max}명까지
             현재인원 ${ppl_num_now}명! </p>
-          <div id = "parti-button" onclick="changeParti(); plus_ppl('${_id}'); plus_member('${_id}')"> <button> 참여하기</button> </div> 
+          <div id = "parti-button" onclick="plus_ppl('${_id}'); plus_member('${_id}')"> <button> 참여하기</button> </div> 
+
         </div>
     </div>`;
     
@@ -290,12 +293,18 @@
             <p>안녕하세요, {{ user_email }}님!</p>
             <button onclick="logout()" class="btn btn-outline-secondary">로그아웃</button>
             <button id="write-order" onclick="go_write()" class="btn btn-outline-info">글쓰기</button>
+
         </div>
         {% else %}
         <div class="rightbutton">
             <button onclick="go_login()">로그인</button>
         </div>
+        
         {% endif %}  {# if 블록 닫기 #}
+        <div class="rightbutton">
+            <button onclick="go_order_detail()">내주문확인</button>
+        </div>
+
             <div style = "width:180px; border: 1px dotted;"> <div class = "lefttextbox"> 먹고싶은걸 고르셨다면?</div></div>
             <hr width = "100%" color = "black">
             
