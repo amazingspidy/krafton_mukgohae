@@ -59,25 +59,42 @@ def read_orders():
 
 @app.route('/plus', methods=['POST'])
 def plus_curmem_num():
-     # 1. order 목록에서 find_one으로 id를통해 가져오기
-     id_receive = request.form['order_id']
      
-
+     id_receive = request.form['order_id']     
      order = db.order.find_one({'_id': ObjectId(id_receive)})
-     print(order)
-     # 2. 해당 order에 1을 더해준 new_ppl 변수를 만듭니다.
      
-     
-     
-     new_ppl = int(order['ppl_num_now']) + 1
+     # 참여하기 누르기 전 ppl num now 가져오기
+     ppl_num_now = int(order['ppl_num_now'])
+ 
+     # 1 증가
+     ppl_num_new = ppl_num_now + 1
+
+     # 증가 값 디비에 업뎃
      result = db.order.update_one({'_id': ObjectId(id_receive)}, {
-                                    '$set': {'ppl_num_now': new_ppl}})
+                                    '$set': {'ppl_num_now': ppl_num_new}})
+     
+     # send_email()에 넘길 인자 가져오기
+     # 여기요
+     ppl_num_aim = int(order['ppl_num_aim'])
+
+     # 참여하기 누르면 이메일 함수 호출
+     send_email(ppl_num_new, ppl_num_aim)
 
      if result.modified_count == 1:
          return jsonify({'result': 'success'})
      else:
          return jsonify({'result': 'failure'})
+
     
+# 이메일 함수
+def send_email(ppl_num_new, ppl_num_aim):
+    
+    # 목표 인원 달성 시 (현재인원 >= 목표인원)
+    # if (ppl_num_new >= ppl_num_aim):
+        
+    
+    
+
 
 
 @app.route('/add_member', methods=['POST'])
@@ -227,28 +244,7 @@ def write_order():
 
 
 
-# @app.route('/list', methods=['GET'])
-# def read_orders():
-#     current_date = str(datetime.now().date()).replace('-','')
-#     current_time = str(datetime.now().strftime("%H%M"))
-#     current_datetime = current_date + current_time
-    
-#     order_datetime = ''
-    
-#     valid_orders = []
 
-#     result = list(db.order.find({}, {'_id':0}))
-
-#     for order in result:
-#         order_date = order['order_date'].replace('-','')
-#         order_time = order['order_time'].replace(':','')
-#         order_datetime = order_date + order_time
-#         print('order_datetime : ', order_datetime)
-#         if (int(order_datetime) > int(current_datetime)):
-#             valid_orders.append(order)
-#             print('valid_orders', valid_orders)
-    
-#     return jsonify({'result': 'success', 'orders': valid_orders})
 
 
 if __name__ == '__main__':
