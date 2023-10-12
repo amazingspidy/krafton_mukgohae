@@ -25,11 +25,8 @@ db = client.dbmukgohae
 
 @app.route('/')
 def home():
-    orders = [{'withwho':'함께',
-              'restaurant':'홍콩반점',
-              'menu':'꿔바로우'}]
-    
-    return render_template('main.html', orders=orders)
+    user_email = session.get('email', None)
+    return render_template('main.html', user_email=user_email)
 
 @app.route('/login')
 def login():
@@ -97,6 +94,7 @@ def secure_api():
     if 'email' in session:
         # 사용자가 로그인되어 있을 때만 접근 가능
         return jsonify({'result': 'success', 'message': '인증된 사용자입니다.'})
+        
     else:
         return jsonify({'result': 'fail', 'message': '인증이 필요합니다.'})
 
