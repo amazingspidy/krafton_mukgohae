@@ -11,12 +11,10 @@
 
     <!-- Optional JavaScript -->
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
-        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"> </script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
     <title>먹고해 | 메인페이지</title>
     <style>
         .rightbutton {
@@ -61,12 +59,12 @@
                 }
             })
         }
+    
 
         $(document).ready(function () {
             // 맨 처음 접속시에는 orderMode 가 False입니다.
             orderMode = false;
-            showMain()
-
+            show_orders();
         });
 
 
@@ -87,6 +85,55 @@
         function go_write() {
             window.location.href = '/write'
         }
+
+        function show_orders() {
+            console.log('hey!!!')
+            $.ajax({
+                type: "GET",
+                url: "/list",
+                data: {},
+                success: function (response) {
+                    let orders = response["orders"];
+                    for (let i = 0; i < orders.length; i++) {
+                        make_orders(orders[i]["order_date"],orders[i]["order_time"],
+                        orders[i]["food_category"], orders[i]["with_who"], orders[i]["food_shop"], 
+                        orders[i]["food_name"], orders[i]["ppl_num_aim"], orders[i]["ppl_num_max"]);
+                    }
+                }
+            })
+        }
+
+        function make_orders(order_date, order_time, food_category, with_who, food_shop, food_name,ppl_num_aim,ppl_num_max ){
+            let temp_html = `
+            <div class="card">
+            <div class="card-header">
+              함께먹나요? ${with_who}  ${food_category}먹어요
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">날짜 & 시간</h5>
+              <p class="card-text">${order_date}, ${order_time}</p>
+              <p class="card-text">최대 ${ppl_num_max} 명중 ${ppl_num_aim}명 참여!</p>
+              <div id = "parti-button" onclick="changeParti()"> <button> 참여하기</button> </div> 
+            </div>
+        </div>`;
+        $("#orders-list").append(temp_html);
+
+            
+        }
+
+        // {% for order in orders %}
+        // <div class="card">
+        //     <div class="card-header">
+        //       {{ order.withwho }} 먹어요
+        //     </div>
+        //     <div class="card-body">
+        //       <h5 class="card-title">날짜 & 시간</h5>
+        //       <p class="card-text">{{ order.restaurant }}/{{ order.menu }}/주문자명</p>
+        //       <p class="card-text">최대 n명중 m명 참여! (m/n)</p>
+        //       <div id = "parti-button" onclick="changeParti()"> <button> 참여하기</button> </div> 
+        //     </div>
+        // </div>
+        // {% endfor %} 
     </script>
 </head>
 
@@ -102,20 +149,8 @@
             </div>
             <hr width = "100%" color = "black">
         <div style = "width:180px; border: 1px dotted;"> <div class = "lefttextbox"> 뭐 먹을지 모르겠을때!</div></div>
-
-        {% for order in orders %}
-        <div class="card">
-            <div class="card-header">
-              {{ order.withwho }} 먹어요
-            </div>
-            <div class="card-body">
-              <h5 class="card-title">날짜 & 시간</h5>
-              <p class="card-text">{{ order.restaurant }}/{{ order.menu }}/주문자명</p>
-              <p class="card-text">최대 n명중 m명 참여! (m/n)</p>
-              <div id = "parti-button" onclick="changeParti()"> <button> 참여하기</button> </div> 
-            </div>
-        </div>
-        {% endfor %}
+        <div id = "orders-list"> </div>
+        
           
     </div>
     
