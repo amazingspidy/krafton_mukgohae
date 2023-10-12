@@ -188,7 +188,9 @@ def write_order():
                          'food_name': food_name,
                          'ppl_num_aim': ppl_num_aim,
                          'ppl_num_max': ppl_num_max,
-                         'ppl_num_now': ppl_num_now})
+                         'ppl_num_now': ppl_num_now,
+                         'member_names' : "",
+                         'replys': [] })
     return jsonify({'result': 'success'})
 
 # @app.route('/list', methods=['GET'])

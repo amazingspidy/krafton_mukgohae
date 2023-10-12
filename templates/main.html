@@ -98,7 +98,9 @@
         // 맨 처음 접속시에는 orderMode 가 False입니다.
         sort_mode = Sort.BY_ALL
         orderMode = false;
-        show_orders();
+        if (sort_mode == "all") {
+            show_prefer(sort_mode)
+        }
         hello()
     });
 
@@ -142,26 +144,6 @@
          });
      }
     
-    function show_orders(){
-        
-        let temp_html = `
-        {% for order in orders %}
-
-        <div class="card">
-        <div class="card-header">
-          함께먹나요? {{ order.with_who }}
-        </div>
-        <div class="card-body">
-          <h5 class="card-title">{{ order.order_date }} {{ order.order_time }}</h5>
-          <p class="card-text">{{ order.food_shop }}에서 {{ order.food_name}}을 시켜요!</p>
-          <p class="card-text"> 최소 {{ order.ppl_num_aim}}명에서 최대 {{ order.ppl_num_max }}명까지
-            현재인원 {{order.ppl_num_now}}명! {{order._id}}</p>
-          <div id = "parti-button" id={{order._id}} onClick="plus_ppl(id);changeParti();"> <button> 참여하기</button> </div> 
-        </div>
-        {% endfor %}
-    </div>`;
-    $("#orders-list").append(temp_html);
-    }
 
     function show_prefer(sort_mode) {
         console.log('hey!!!')
@@ -172,7 +154,7 @@
             success: function (response) {
                 let orders = response["orders"];
                 for (let i = 0; i < orders.length; i++) {
-                    if (food_cate_dict[orders[i]["food_category"]] == sort_mode) {
+                    if (food_cate_dict[orders[i]["food_category"]] == sort_mode || sort_mode =="all") {
                     make_orders(orders[i]["_id"], orders[i]["order_date"],orders[i]["order_time"],
                     orders[i]["food_category"], orders[i]["with_who"], orders[i]["food_shop"], 
                     orders[i]["food_name"], orders[i]["ppl_num_aim"], orders[i]["ppl_num_max"],
