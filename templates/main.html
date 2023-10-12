@@ -147,7 +147,7 @@
          });
      }
     
-    
+
 
     function show_prefer(sort_mode) {
         console.log('hey!!!')
@@ -158,7 +158,9 @@
             success: function (response) {
                 let orders = response["orders"];
                 for (let i = 0; i < orders.length; i++) {
+
                     if (food_cate_dict[orders[i]["food_category"]] == sort_mode || sort_mode == "all") {
+
                     make_orders(orders[i]["_id"], orders[i]["order_date"],orders[i]["order_time"],
                     orders[i]["food_category"], orders[i]["with_who"], orders[i]["food_shop"], 
                     orders[i]["food_name"], orders[i]["ppl_num_aim"], orders[i]["ppl_num_max"],
