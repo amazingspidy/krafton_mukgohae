@@ -10,7 +10,7 @@
         integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
 
     <!-- Optional JavaScript -->
-    
+
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
     <script src="https://code.jquery.com/jquery-3.5.1.js"> </script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
@@ -40,25 +40,24 @@
 <script>
   $(document).ready(function () {
               hello()
+              get_detail()
           });
 
   function hello() {
-            $.ajax({
-                type: "GET",
-                url: "/api/secure",
-                data: {},
-                success: function (response) {
-                    if (response['result'] == 'success') {
-                        // 로그인한 사용자면 닉네임을 보여주는 알람을 띄움!
-                        let nickname = response['nickname']
-                        alert(`반갑습니다 ${nickname}님!!`)
-                    } else {
-                        alert(response['message'])
-                        window.location.href = '/login'
-                    }
+        $.ajax({
+            type: "GET",
+            url: "/api/secure",
+            data: {},
+            success: function (response) {
+                if (response['result'] == 'success') {
+                    console.log(response)
+                } else {
+                    alert(response['msg'])
+                    window.location.href = '/login'
                 }
-            })
-        }        
+            }
+        })
+    }
   
   function go_login() {
         window.location.href = '/login'
@@ -75,48 +74,55 @@
                 }
             })
         }
-                  
-</script>
+        // 업데이트 수정 예정
+  // function update_order() {
+  //     var place = $('#place').val();
+  //     var accout_num = $('#accout_num').val();
 
-<body>
-    <div class = "rightbutton">
-      <!-- 로그인 상태에 따라 로그아웃 또는 로그인 버튼을 표시 -->
-        {% if 'email' in session %}
-        <button onclick="logout()">로그아웃</button>
-        {% else %}
-        <button onclick="go_login()">로그인</button>
-        {% endif %}  {# if 블록 닫기 #}  
-          <div class="card">
+  //     console.log(place, accout_num)
+  //     $.ajax({
+  //         type: "POST",
+  //         url: "/update_order",
+  //         data: {
+  //           'place': place,
+  //           'accout_num': accout_num,
+
+  //         },
+  //         success: function (response) {
+  //             console.log(response)
+  //             if (response['result'] == 'success') {
+
+  //                 alert('수정되었습니다.');
+  //                 window.location.href = '/order_detail';
+  //             } else {
+  //                 alert(response['msg']);
+  //             }
+  //         }
+  //     });
+  // }   
+
+  function get_detail() {
+    $.ajax({
+                type: "GET",
+                url: "/member_search",
+                data: {},
+                success: function (response) {
+                  let orders = response["orders"];
+                    console.log(orders['food_name'], orders['food_shop'])
+                    
+                    let temp_html = `
+                    <div class="card">
               <div class="card-header">
-                혼자/함께 먹어요
+                함께먹나요? ${orders['with_who']}
               </div>
               <div class="card-body">
-                <div class = "inlining"> <h5 class="card-title">날짜 & 시간</h5><p class="card-text">식당/메뉴/주문자명</p></div>
-                <p class="card-text">최대 n명중 m명 참여! (m/n)</p>
+                <div class = "inlining"> <h5 class="card-title">${orders["order_date"]} & ${orders["order_time"]}</h5><p class="card-text">${orders["food_shop"]}/${orders["food_name"]}/${orders["user_email"]}</p></div>
+                <p class="card-text">최대 ${orders["ppl_num_max"]}명중 ${orders["ppl_num_now"]}명 참여!</p>
+                <p class="card-text">장소: ${orders["place"]} </p>
+                <p class="card-text">계좌번호: ${orders["account_num"]}</p>
               </div>
-            </div>
-            <div class="input-group mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup-sizing-default">장소</span>
-              </div>
-              <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
             </div>
             
-            <div class="input-group mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup-sizing-default">계좌정보</span>
-              </div>
-              <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
-            </div>
-            <button>수정하기</button> 
-            <div class="media">
-              
-              <div class="media-body">
-                <h5 class="mt-0">게시판</h5>
-                <p>공지사항을 댓글을 통해 전달하세요!</p>
-                
-              </div>
-            </div>
           
             <div class="card mb-2">
               <div class="card-header bg-light">
@@ -131,8 +137,33 @@
                     </li>
                 </ul>
               </div>
-            </div>
+            </div>`;
+
+            $("#show-mypage").append(temp_html);
+                }
+            })
+        }
+</script>
+
+<body>
+    <div class = "rightbutton">
+      <!-- 로그인 상태에 따라 로그아웃 또는 로그인 버튼을 표시 -->
+        {% if user_email %}
+            <p>안녕하세요, {{ user_email }}님!</p>
+            <button onclick="logout()">로그아웃</button>
+        </div>
+        {% else %}
+        <div class="rightbutton">
+          <button onclick="go_login()">로그인</button>
+        </div>
+        {% endif %}  {# if 블록 닫기 #}
+        <div class="media-body">
+          <h5 class="mt-0">게시판</h5>
+          <p>공지사항을 댓글을 통해 전달하세요!</p>
           
+        </div>
+      </div>
+        <div id = "show-mypage"> </div>
           
     </div>
 </body>

@@ -71,9 +71,7 @@
             data: {},
             success: function (response) {
                 if (response['result'] == 'success') {
-                    // 로그인한 사용자면 닉네임을 보여주는 알람을 띄움!
-                    let nickname = response['nickname']
-                    alert(`반갑습니다 ${nickname}님!!`)
+                    console.log(response)
                 } else {
                     alert(response['msg'])
                     window.location.href = '/login'
@@ -107,17 +105,9 @@
     });
 
 
-    function changeParti() {
-        if (orderMode == false) {
-            alert('참여완료!')
-            $('#parti-button').empty()
-            $('#parti-button').append('<button id="show-info" onclick="go_order_detail()"> 게시판보기</button>')
-            orderMode = true
-        }
-        
-    }
+    
     function go_order_detail() {
-        alert('게시판으로갑니다')
+        
         window.location.href = '/order_detail'
 
     }
@@ -135,18 +125,34 @@
              success: function (response) {
                  if (response['result'] == 'success') {
                      // 2. '좋아요 완료!' 얼럿을 띄웁니다.
-                     alert('현재인원 증가 완료!')
+                     
                      // 3. 변경된 정보를 반영하기 위해 새로고침합니다.
                      //#region showMovie()
             
                     
                  } else {
-                     alert('좋아요 실패ㅠㅠ')
+                     alert('증가 실패ㅠㅠ')
                  }
              }
          });
      }
     
+
+    function plus_member(order_id) {
+        $.ajax({
+             type: 'POST',
+             url: '/add_member',
+             data: { order_id: order_id },
+             success: function (response) {
+                 if (response['result'] == 'success') {
+                     
+        
+                 } else {
+                     alert('추가 실패ㅠㅠ')
+                 }
+             }
+         });
+    }
     
 
     function show_prefer(sort_mode) {
@@ -158,7 +164,9 @@
             success: function (response) {
                 let orders = response["orders"];
                 for (let i = 0; i < orders.length; i++) {
+
                     if (food_cate_dict[orders[i]["food_category"]] == sort_mode || sort_mode == "all") {
+
                     make_orders(orders[i]["_id"], orders[i]["order_date"],orders[i]["order_time"],
                     orders[i]["food_category"], orders[i]["with_who"], orders[i]["food_shop"], 
                     orders[i]["food_name"], orders[i]["ppl_num_aim"], orders[i]["ppl_num_max"],
@@ -183,7 +191,7 @@
           <p class="card-text">${food_shop}에서 ${food_name}을 시켜요!</p>
           <p class="card-text">최소 ${ppl_num_aim}명 에서 최대 ${ppl_num_max}명까지
             현재인원 ${ppl_num_now}명! </p>
-          <div id = "parti-button" onclick="changeParti(); plus_ppl('${_id}');"> <button> 참여하기</button> </div> 
+          <div id = "parti-button" onclick="plus_ppl('${_id}'); plus_member('${_id}')"> <button> 참여하기</button> </div> 
         </div>
     </div>`;
     
@@ -255,12 +263,22 @@
 <body>
     <div class = "rightbutton">
          <!-- 로그인 상태에 따라 로그아웃 또는 로그인 버튼을 표시 -->
-         {% if 'email' in session %}
+        {% if user_email %}
+            <p>안녕하세요, {{ user_email }}님!</p>
             <button onclick="logout()">로그아웃</button>
-         {% else %}
-            <button onclick="go_login()">로그인</button>
-         {% endif %}
             <button id="write-order" onclick="go_write()">글쓰기</button>
+            
+        </div>
+        {% else %}
+        <div class="rightbutton">
+            <button onclick="go_login()">로그인</button>
+        </div>
+
+        
+        {% endif %}  {# if 블록 닫기 #}
+        <div class="rightbutton">
+            <button onclick="go_order_detail()">내주문확인</button>
+        </div>
             <div style = "width:180px; border: 1px dotted;"> <div class = "lefttextbox"> 먹고싶은걸 고르셨다면?</div></div>
             <hr width = "100%" color = "black">
             

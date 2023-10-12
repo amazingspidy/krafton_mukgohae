@@ -1,5 +1,9 @@
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for
 
+# email 모듈
+import smtplib
+from email.mime.text import MIMEText
+
 # JWT 패키지를 사용합니다. (설치해야할 패키지 이름: PyJWT)
 import jwt
 
@@ -32,36 +36,113 @@ def home():
     result = list(db.order.find({}))
     return render_template('main.html', orders=result, user_email=user_email)
 
+# read_orders()
 @app.route('/list', methods=['GET'])
 def read_orders():
+    current_date = str(datetime.datetime.now().date()).replace('-','')
+    current_time = str(datetime.datetime.now().strftime("%H%M"))
+    current_datetime = current_date + current_time
+    
+    order_datetime = ''
+    
+    valid_orders = []
+
     result = list(db.order.find({}))
+
     for i in result:
         i['_id'] = str(i['_id'])
-    return jsonify({'result': 'success', 'orders': result})
+
+    for order in result:
+        order_date = order['order_date'].replace('-','')
+        order_time = order['order_time'].replace(':','')
+        order_datetime = order_date + order_time
+        if (int(order_datetime) > int(current_datetime)):
+            valid_orders.append(order)
+    
+    return jsonify({'result': 'success', 'orders': valid_orders})
 
 @app.route('/plus', methods=['POST'])
 def plus_curmem_num():
-     # 1. movies 목록에서 find_one으로 영화 하나를 찾습니다.
-     id_receive = request.form['order_id']
      
-
+     id_receive = request.form['order_id']     
      order = db.order.find_one({'_id': ObjectId(id_receive)})
-     print(order)
-     # 2. movie의 like 에 1을 더해준 new_like 변수를 만듭니다.
-     print(order['ppl_num_now'])
-     print(type(order['ppl_num_now']))
      
-     # 참고: '$set' 활용하기!
-     new_ppl = int(order['ppl_num_now']) + 1
+     # 참여하기 누르기 전 ppl num now 가져오기
+     ppl_num_now = int(order['ppl_num_now'])
+ 
+     # 1 증가
+     ppl_num_new = ppl_num_now + 1
+
+     # 증가 값 디비에 업뎃
      result = db.order.update_one({'_id': ObjectId(id_receive)}, {
-                                    '$set': {'ppl_num_now': new_ppl}})
+                                    '$set': {'ppl_num_now': ppl_num_new}})
+     
+     # send_email()에 넘길 인자 가져오기
+     order_owner_email = order['user_email']
+     ppl_num_aim = int(order['ppl_num_aim'])
+
+     # 목표인원 달성 시 (현재인원 >= 목표인원) send_email() 호출로 이메일 보내기
+     if (ppl_num_new >= ppl_num_aim):
+        send_email(order_owner_email)
 
      if result.modified_count == 1:
          return jsonify({'result': 'success'})
      else:
          return jsonify({'result': 'failure'})
+
+    
+# 이메일 함수
+def send_email(order_owner_email):
+    
+    # (*)보낼 메일의 내용과 제목
+    content = """
+    목표인원이 달성되었습니다
+    """
+    title = '목표인원이 달성되었습니다.'
+
+    msg = MIMEText(content)
+    msg['Subject'] = title
+
+    # (*)메일의 발신자 메일 주소, 수신자 메일 주소, 앱비밀번호(발신자) 
+    sender = 'churn82@gmail.com'
+    receiver = order_owner_email
+    app_password = 'dvtj hbej joks nujz'
+
+
+    # 세션 생성
+    with smtplib.SMTP('smtp.gmail.com', 587) as s:
+        # TLS 암호화
+        s.starttls()
+
+        # 로그인 인증과 메일 보내기
+        s.login(sender, app_password)
+        s.sendmail(sender, receiver, msg.as_string())
+        
     
 
+    
+    
+
+
+@app.route('/add_member', methods=['POST'])
+def add_member():
+     # 1. order 목록에서 find_one으로 id기반으로 영화 하나를 찾습니다.
+     id_receive = request.form['order_id']
+     user_email = session.get('email', None)
+     order = db.order.find_one({'_id': ObjectId(id_receive)})
+
+     new_member = order['member_names']
+     
+     #user_email추가
+     new_member.append(user_email)
+     # 
+     result = db.order.update_one({'_id': ObjectId(id_receive)}, {
+                                    '$set': {'member_names': new_member}})
+
+     if result.modified_count == 1:
+         return jsonify({'result': 'success'})
+     else:
+         return jsonify({'result': 'failure'})
 
 @app.route('/login')
 def login():
@@ -74,12 +155,23 @@ def signup():
 
 @app.route('/write')
 def write():
-    return render_template('write.html')
-
+    user_email = session.get('email', None)
+    return render_template('write.html', user_email=user_email)
 
 @app.route('/order_detail')
 def order_detail():
-    return render_template('order_detail.html')
+    user_email = session.get('email', None)
+    result = list(db.order.find({}))
+    return render_template('order_detail.html', orders=result, user_email=user_email)
+
+
+@app.route('/member_search', methods=['GET'])
+def member_search():
+    user_email = session.get('email', None)
+    result = db.order.find_one({'member_names': user_email}, {'_id':0})
+
+    return jsonify({'result': 'success', 'orders': result})
+    #return render_template('order_detail.html', user_email=user_email)
 
 
 # 회원가입
@@ -142,6 +234,7 @@ def secure_api():
 def write_order():
     
     print('test',request.form)
+    user_email = session.get('email', None)
     order_date = request.form['order_date']
     order_time = request.form['order_time']
     food_category = request.form['food_category']
@@ -151,9 +244,12 @@ def write_order():
     ppl_num_aim = request.form['ppl_num_aim']
     ppl_num_max = request.form['ppl_num_max']
     ppl_num_now = request.form['ppl_num_now']
+    place = request.form['place']
+    account_num = request.form['account_num']
     
 
-    db.order.insert_one({'order_date': order_date,
+    db.order.insert_one({'user_email':user_email,
+                         'order_date': order_date,
                          'order_time': order_time,
                          'food_category': food_category,
                          'with_who': with_who,
@@ -162,34 +258,29 @@ def write_order():
                          'ppl_num_aim': ppl_num_aim,
                          'ppl_num_max': ppl_num_max,
                          'ppl_num_now': ppl_num_now,
-                         'member_names' : "",
+                         'member_names' : [],
+                         'place' : place,
+                         'account_num' : account_num,
                          'replys': [],
                         })
     return jsonify({'result': 'success'})
 
-
-# @app.route('/list', methods=['GET'])
-# def read_orders():
-#     current_date = str(datetime.now().date()).replace('-','')
-#     current_time = str(datetime.now().strftime("%H%M"))
-#     current_datetime = current_date + current_time
+#업데이트로 추후 수정 예정
+# @app.route('/update_order', methods=['POST'])
+# def write_order():
+#     place = request.form['place']
+#     accout_num = request.form['accout_num']
     
-#     order_datetime = ''
-    
-#     valid_orders = []
 
-#     result = list(db.order.find({}, {'_id':0}))
+#     db.order.update_one({'_id': ObjectId(id_receive)},{'$set': {'place': place}})
+#     db.order.update_one({'_id': ObjectId(id_receive)},{'$set': {'accout_num': accout_num}})
 
-#     for order in result:
-#         order_date = order['order_date'].replace('-','')
-#         order_time = order['order_time'].replace(':','')
-#         order_datetime = order_date + order_time
-#         print('order_datetime : ', order_datetime)
-#         if (int(order_datetime) > int(current_datetime)):
-#             valid_orders.append(order)
-#             print('valid_orders', valid_orders)
-    
-#     return jsonify({'result': 'success', 'orders': valid_orders})
+#     return jsonify({'result': 'success'})
+
+
+
+
+
 
 
 if __name__ == '__main__':

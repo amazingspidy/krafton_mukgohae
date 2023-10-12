@@ -49,6 +49,8 @@
       var food_name = $('#food_name').val();
       var ppl_num_aim = $('#ppl_num_aim').val();
       var ppl_num_max = $('#ppl_num_max').val();
+      var place = $('#place').val();
+      var account_num = $('#account_num').val();
       console.log(order_date, order_time)
       $.ajax({
           type: "POST",
@@ -62,13 +64,15 @@
             'food_name': food_name,
             'ppl_num_aim': ppl_num_aim,
             'ppl_num_max': ppl_num_max,
-            'ppl_num_now': 1
+            'ppl_num_now': 1,
+            'place': place,
+            'account_num': account_num,
           },
           success: function (response) {
               console.log(response)
               if (response['result'] == 'success') {
 
-                  alert('업로드 되었습니다. 메인페이지로 이동합니다.');
+                  
                   window.location.href = '/';
               } else {
                   alert(response['msg']);
@@ -76,23 +80,24 @@
           }
       });
   }
+
+  // 로그인에 성공해서 토큰이 있는 경우에만 인사하기!
   function hello() {
-            $.ajax({
-                type: "GET",
-                url: "/api/secure",
-                data: {},
-                success: function (response) {
-                    if (response['result'] == 'success') {
-                        // 로그인한 사용자면 닉네임을 보여주는 알람을 띄움!
-                        let nickname = response['nickname']
-                        alert(`반갑습니다 ${nickname}님!!`)
-                    } else {
-                        alert(response['message'])
-                        window.location.href = '/login'
-                    }
+        $.ajax({
+            type: "GET",
+            url: "/api/secure",
+            data: {},
+            success: function (response) {
+                if (response['result'] == 'success') {
+                    console.log(response)
+                } else {
+                    alert(response['msg'])
+                    window.location.href = '/login'
                 }
-            })
-        }
+            }
+        })
+    }
+
   function logout() {
     $.ajax({
                 type: "GET",
@@ -104,25 +109,24 @@
                 }
             })
         }
+
+  function go_login() {
+        window.location.href = '/login'
+    }
   
 </script>
 
 <body>
     <div class = "rightbutton">
-
-         <!-- 로그인 상태에 따라 로그아웃 또는 로그인 버튼을 표시 -->
-
-      {% if 'email' in session %}
-      <button onclick="logout()">로그아웃</button>
+      {% if user_email %}
+            <p>안녕하세요, {{ user_email }}님!</p>
+            <button onclick="logout()">로그아웃</button>
+    </div>
       {% else %}
-      <button onclick="go_login()">로그인</button>
+        <div class="rightbutton">
+            <button onclick="go_login()">로그인</button>
+        </div>
       {% endif %}  {# if 블록 닫기 #}
-
-        
-
-
-
-
         <div class="input-group mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text">날짜</span>
@@ -190,10 +194,24 @@
           </div>
           <input type="text" id="ppl_num_max" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
         </div>
+
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" >장소</span>
+          </div>
+          <input type="text" id="place" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" >계좌번호</span>
+          </div>
+          <input type="text" id="account_num" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
           
         <button onclick="write_order()">입력하기</button> 
           
-    </div>
+    
     
     
     
