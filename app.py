@@ -59,7 +59,7 @@ def read_orders():
 
 @app.route('/plus', methods=['POST'])
 def plus_curmem_num():
-
+     
      id_receive = request.form['order_id']     
      order = db.order.find_one({'_id': ObjectId(id_receive)})
      
@@ -84,6 +84,7 @@ def plus_curmem_num():
          return jsonify({'result': 'success'})
      else:
          return jsonify({'result': 'failure'})
+
     
 # 이메일 함수
 def send_email(ppl_num_new, ppl_num_aim):
@@ -96,6 +97,26 @@ def send_email(ppl_num_new, ppl_num_aim):
 
 
 
+@app.route('/add_member', methods=['POST'])
+def add_member():
+     # 1. order 목록에서 find_one으로 id기반으로 영화 하나를 찾습니다.
+     id_receive = request.form['order_id']
+    
+     order = db.order.find_one({'_id': ObjectId(id_receive)})
+     print(order)
+     
+     
+     
+     # 참고: '$set' 활용하기!
+     new_member = order['members_names'].append('유저네임')
+     result = db.order.update_one({'_id': ObjectId(id_receive)}, {
+                                    '$set': {'members_names': new_member}})
+
+     if result.modified_count == 1:
+         return jsonify({'result': 'success'})
+     else:
+         return jsonify({'result': 'failure'})
+
 @app.route('/login')
 def login():
     return render_template('login.html')
@@ -107,12 +128,14 @@ def signup():
 
 @app.route('/write')
 def write():
-    return render_template('write.html')
+    user_email = session.get('email', None)
+    return render_template('write.html', user_email=user_email)
 
 
 @app.route('/order_detail')
 def order_detail():
-    return render_template('order_detail.html')
+    user_email = session.get('email', None)
+    return render_template('order_detail.html', user_email=user_email)
 
 
 # 회원가입
@@ -175,6 +198,7 @@ def secure_api():
 def write_order():
     
     print('test',request.form)
+    user_email = session.get('email', None)
     order_date = request.form['order_date']
     order_time = request.form['order_time']
     food_category = request.form['food_category']
@@ -184,9 +208,12 @@ def write_order():
     ppl_num_aim = request.form['ppl_num_aim']
     ppl_num_max = request.form['ppl_num_max']
     ppl_num_now = request.form['ppl_num_now']
+    place = request.form['place']
+    account_num = request.form['account_num']
     
 
-    db.order.insert_one({'order_date': order_date,
+    db.order.insert_one({'user_email':user_email,
+                         'order_date': order_date,
                          'order_time': order_time,
                          'food_category': food_category,
                          'with_who': with_who,
@@ -195,10 +222,26 @@ def write_order():
                          'ppl_num_aim': ppl_num_aim,
                          'ppl_num_max': ppl_num_max,
                          'ppl_num_now': ppl_num_now,
-                         'member_names' : "",
+                         'member_names' : [],
+                         'place' : place,
+                         'account_num' : account_num,
                          'replys': [],
                         })
     return jsonify({'result': 'success'})
+
+#업데이트로 추후 수정 예정
+# @app.route('/update_order', methods=['POST'])
+# def write_order():
+#     place = request.form['place']
+#     accout_num = request.form['accout_num']
+    
+
+#     db.order.update_one({'_id': ObjectId(id_receive)},{'$set': {'place': place}})
+#     db.order.update_one({'_id': ObjectId(id_receive)},{'$set': {'accout_num': accout_num}})
+
+#     return jsonify({'result': 'success'})
+
+
 
 
 
