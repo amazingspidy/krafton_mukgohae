@@ -99,6 +99,18 @@
   //         }
   //     });
   // }   
+
+  function get_detail() {
+    $.ajax({
+                type: "GET",
+                url: "/member_search",
+                data: {},
+                success: function (response) {
+                  let orders = response["orders"];
+                    console.log(orders['food_shop'])
+                }
+            })
+        }
 </script>
 
 <body>
