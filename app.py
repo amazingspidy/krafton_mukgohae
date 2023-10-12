@@ -32,12 +32,31 @@ def home():
     result = list(db.order.find({}))
     return render_template('main.html', orders=result, user_email=user_email)
 
+# read_orders()
 @app.route('/list', methods=['GET'])
 def read_orders():
+    current_date = str(datetime.datetime.now().date()).replace('-','')
+    current_time = str(datetime.datetime.now().strftime("%H%M"))
+    current_datetime = current_date + current_time
+    
+    order_datetime = ''
+    
+    valid_orders = []
+
     result = list(db.order.find({}))
+
     for i in result:
+        print('latte : ', i)
         i['_id'] = str(i['_id'])
-    return jsonify({'result': 'success', 'orders': result})
+
+    for order in result:
+        order_date = order['order_date'].replace('-','')
+        order_time = order['order_time'].replace(':','')
+        order_datetime = order_date + order_time
+        if (int(order_datetime) > int(current_datetime)):
+            valid_orders.append(order)
+    
+    return jsonify({'result': 'success', 'orders': valid_orders})
 
 @app.route('/plus', methods=['POST'])
 def plus_curmem_num():
