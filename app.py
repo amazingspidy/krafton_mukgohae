@@ -8,10 +8,13 @@ import datetime
 import hashlib
 from pymongo import MongoClient
 
-from datetime import datetime
-
+from bson import ObjectId
 
 # JWT 토큰을 만들 때 필요한 비밀문자열
+
+
+app = Flask(__name__)
+app.secret_key = 'MUKGOHAE'
 
 
 app = Flask(__name__)
@@ -26,7 +29,39 @@ db = client.dbmukgohae
 @app.route('/')
 def home():
     user_email = session.get('email', None)
-    return render_template('main.html', user_email=user_email)
+    result = list(db.order.find({}))
+    return render_template('main.html', orders=result, user_email=user_email)
+
+@app.route('/list', methods=['GET'])
+def read_orders():
+    result = list(db.order.find({}))
+    for i in result:
+        i['_id'] = str(i['_id'])
+    return jsonify({'result': 'success', 'orders': result})
+
+@app.route('/plus', methods=['POST'])
+def plus_curmem_num():
+     # 1. movies 목록에서 find_one으로 영화 하나를 찾습니다.
+     id_receive = request.form['order_id']
+     
+
+     order = db.order.find_one({'_id': ObjectId(id_receive)})
+     print(order)
+     # 2. movie의 like 에 1을 더해준 new_like 변수를 만듭니다.
+     print(order['ppl_num_now'])
+     print(type(order['ppl_num_now']))
+     
+     # 참고: '$set' 활용하기!
+     new_ppl = int(order['ppl_num_now']) + 1
+     result = db.order.update_one({'_id': ObjectId(id_receive)}, {
+                                    '$set': {'ppl_num_now': new_ppl}})
+
+     if result.modified_count == 1:
+         return jsonify({'result': 'success'})
+     else:
+         return jsonify({'result': 'failure'})
+    
+
 
 @app.route('/login')
 def login():
@@ -87,7 +122,6 @@ def logout():
     return redirect(url_for('login'))  # 로그인 페이지로 리디렉션
 
 
-
 #인증
 @app.route('/api/secure', methods=['GET'])
 def secure_api():
@@ -97,9 +131,6 @@ def secure_api():
         
     else:
         return jsonify({'result': 'fail', 'message': '인증이 필요합니다.'})
-
-
-
 
 
 @app.route('/write', methods=['POST'])
@@ -114,7 +145,7 @@ def write_order():
     food_name = request.form['food_name']
     ppl_num_aim = request.form['ppl_num_aim']
     ppl_num_max = request.form['ppl_num_max']
-
+    ppl_num_now = request.form['ppl_num_now']
     
 
     db.order.insert_one({'order_date': order_date,
@@ -124,40 +155,34 @@ def write_order():
                          'food_shop': food_shop,
                          'food_name': food_name,
                          'ppl_num_aim': ppl_num_aim,
-                         'ppl_num_max': ppl_num_max })
+                         'ppl_num_max': ppl_num_max,
+                         'ppl_num_now': ppl_num_now})
     return jsonify({'result': 'success'})
 
 
-@app.route('/list', methods=['GET'])
-def read_orders():
-    current_date = str(datetime.now().date()).replace('-','')
-    current_time = str(datetime.now().strftime("%H%M"))
-    current_datetime = current_date + current_time
+# @app.route('/list', methods=['GET'])
+# def read_orders():
+#     current_date = str(datetime.now().date()).replace('-','')
+#     current_time = str(datetime.now().strftime("%H%M"))
+#     current_datetime = current_date + current_time
     
-    order_datetime = ''
+#     order_datetime = ''
     
-    valid_orders = []
+#     valid_orders = []
 
-    result = list(db.order.find({}, {'_id':0}))
+#     result = list(db.order.find({}, {'_id':0}))
 
-    for order in result:
-        order_date = order['order_date'].replace('-','')
-        order_time = order['order_time'].replace(':','')
-        order_datetime = order_date + order_time
-        print('order_datetime : ', order_datetime)
-        if (int(order_datetime) > int(current_datetime)):
-            valid_orders.append(order)
-            print('valid_orders', valid_orders)
+#     for order in result:
+#         order_date = order['order_date'].replace('-','')
+#         order_time = order['order_time'].replace(':','')
+#         order_datetime = order_date + order_time
+#         print('order_datetime : ', order_datetime)
+#         if (int(order_datetime) > int(current_datetime)):
+#             valid_orders.append(order)
+#             print('valid_orders', valid_orders)
     
-    return jsonify({'result': 'success', 'orders': valid_orders})
+#     return jsonify({'result': 'success', 'orders': valid_orders})
 
-
-    
-    
-        
-        
-    
-    
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
