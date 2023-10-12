@@ -84,16 +84,16 @@ def plus_curmem_num():
 def add_member():
      # 1. order 목록에서 find_one으로 id기반으로 영화 하나를 찾습니다.
      id_receive = request.form['order_id']
-    
+     user_email = session.get('email', None)
      order = db.order.find_one({'_id': ObjectId(id_receive)})
-     print(order)
+
+     new_member = order['member_names']
      
-     
-     
-     # 참고: '$set' 활용하기!
-     new_member = order['members_names'].append('유저네임')
+     #user_email추가
+     new_member.append(user_email)
+     # 
      result = db.order.update_one({'_id': ObjectId(id_receive)}, {
-                                    '$set': {'members_names': new_member}})
+                                    '$set': {'member_names': new_member}})
 
      if result.modified_count == 1:
          return jsonify({'result': 'success'})
