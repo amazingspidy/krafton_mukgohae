@@ -142,7 +142,6 @@ def order_detail():
 def member_search():
     user_email = session.get('email', None)
     result = db.order.find_one({'member_names': user_email}, {'_id':0})
-    print(result)
 
     return jsonify({'result': 'success', 'orders': result})
     #return render_template('order_detail.html', user_email=user_email)
