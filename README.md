@@ -1,3 +1,3 @@
 # krafton_mukgohae
-
-# branch test after changing default branch to 'dev'
+Krafton Jungle mini-project.
+공유배달 서비스
